@@ -148,8 +148,6 @@ git switch $modificationsBranch
 
 
 #TODO
-#usare "contains" rende possibile avere errori di battitura: scrivo che voglio fare il merge su "develo" invece
-    #che "develop" e viene accettato come branch, però poi non riesce a fare correttamente il resto dei passaggi
 #la stampa della prima repo non avviene subito per qualche motivo
 #quando chiedo se vuole allineare la realease di uno dei country, fai la merge
     #direttamente dal develop appena allineato
