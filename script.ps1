@@ -15,17 +15,19 @@ write-output ""
 
 #commit current changes
 write-output "COMMIT CURRENT CHANGES"
+$modificationsBranch = git branch --show-current #retrieve current branch
+write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
+git push -u origin $modificationsBranch
 git add .
 git commit -m $commitMessage
 git push
-$modificationsBranch = git branch --show-current #retrieve current branch
-write-output "Current branch: $modificationsBranch"
 write-output ""
 write-output ""
 
 #merge into original branch
 write-output "MERGE INTO THE EXISTING BRANCHES"
+#inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
 $allBranch = git branch
 write-output "List of branches: $allBranch"
 
@@ -43,10 +45,11 @@ while(!$flagBranchFound){
 
     if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
 }
-
 git switch $originalBranch
 git fetch
 git pull
+#fine dello stesso pezzo di codice di sopra
+
 git merge $modificationsBranch
 git push
 write-output ""
@@ -76,8 +79,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
         git fetch --all
         $keepMerging = "y"
         while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
+            #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
             $allBranch = git branch
             write-output "List of branches: $allBranch"
+
             $flagBranchFound = 0
             while(!$flagBranchFound){
                 $originalBranch = read-host "Which branch do you want to merge?"
@@ -95,6 +100,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             git switch $originalBranch
             git fetch
             git pull
+            #fine dello stesso pezzo di codice di sopra
 
             #create the temporary branch and merge into it
             git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
@@ -112,6 +118,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 #merge back into the original branch
                 git switch $originalBranch
                 git merge $modificationsBranch
+                git push
+
                 git branch -D $modificationsBranch #force the delete
                 git push origin -d $modificationsBranch
             } elseif($err.contains("fatal") -or $err.contains("failed")){
@@ -133,10 +141,9 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
 
-#chiedere prima di fare la modifica su ogni repo 
-#(potrebbe voler essere fatta solo su un country)
-    #chiedere su quale branch lo vuole portare 
-        #(fai un while, potrebbe dover essere portato su più branch)
+
+#TODO
+#chiedere prima di fare la modifica su ogni repo - la stampa della prima repo non avviene subito per qualche motivo
 #quando chiedo se vuole allineare la realease di uno dei country, fai la merge
     #direttamente dal develop appena allineato
 #controllo errori
