@@ -41,6 +41,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
     write-output ""
 }
 
+set-location ..\AutomatedGitTool
+
 #$allBranch = git branch -a
 #write-output "List of branches: $allBranch"
 
