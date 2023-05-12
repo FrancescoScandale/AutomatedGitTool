@@ -24,3 +24,11 @@ touch -> new-item -name file.txt -itemtype "file" <br><br>
 - Write (append) a file
     - "test if this works" | add-content -path content.txt
     - "$var" | add-content -path content.txt
+
+## GIT
+- Merging from a remote branch
+    - git merge RemoteRepoName/BranchName
+    - If there is the error "fatal: unrelated histories"
+        - git merge RemoteRepoName/BranchName --allow-unrelated-histories
+- Disable paging in the branch command
+    - git config --global pager.branch false
