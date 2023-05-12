@@ -74,8 +74,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
         git fetch --all
-        $keepMerging = 1
-        while($keepMerging){
+        $keepMerging = "y"
+        while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
             $allBranch = git branch
             write-output "List of branches: $allBranch"
             $flagBranchFound = 0
@@ -122,7 +122,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 write-output "To merge back into main, need to create a pull request from GitHub"
             }
 
-            $keepMerging = read-host "Do you want to merge another branch? [0 if no, 1 if yes]"
+            $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"
         }
     }
     
