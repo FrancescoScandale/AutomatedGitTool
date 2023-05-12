@@ -113,7 +113,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 git switch $originalBranch
                 git merge $modificationsBranch
                 git branch -D $modificationsBranch #force the delete
-                git push origin -D $modificationsBranch
+                git push origin -d $modificationsBranch
             } elseif($err.contains("fatal") -or $err.contains("failed")){
                 write-output "An error occurred, check the messages"
             } else { #can't merge into main, just push the temporary branch
