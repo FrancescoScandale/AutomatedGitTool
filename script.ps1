@@ -36,7 +36,8 @@ while(!$flagBranchFound){
     #for all available branches
     foreach($branchI in $allBranch){
         write-output "$branchI - $originalBranch"
-        if($branchI.contains("develop") -or $branchI.equals("* $originalBranch")){
+        #if($branchI.contains("develop") -or $branchI.equals("* $originalBranch")){
+        if($branchI.contains($originalBranch)){
             $flagBranchFound = 1
             write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
         }
@@ -67,21 +68,50 @@ write-output ""
 #REMOTE REPOSITORIES
 write-output "MERGE REMOTE REPOSITORIES"
 for($i=0;$i -lt $remoteRepos.Length; $i++){
+    read-host "continuing with the next repo..."
+
     set-location $remoteRepos[$i]
     get-location
     git fetch --all
+    
 
-    git branch $modificationsBranch #create the temporary branch if not available
-    git switch $modificationsBranch
+    #start from a branch
+    $allBranch = git branch
+    write-output "List of branches: $allBranch"
+    $flagBranchFound = 0
+    while(!$flagBranchFound){
+        $originalBranch = read-host "From which branch do you want to start?"
+        
+        #for all available branches
+        foreach($branchI in $allBranch){
+            write-output "$branchI - $originalBranch"
+            #if($branchI.contains("develop") -or $branchI.equals("* $originalBranch")){
+            if($branchI.contains($originalBranch)){
+                $flagBranchFound = 1
+                write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
+            }
+        }
+
+        if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
+    }
+    git switch $originalBranch
     git fetch
     git pull
+
+    #create the temporary branch and merge
+    git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
+    git switch $modificationsBranch
     foreach($line in git remote){
         if($line -ne "origin"){
             $parentRepo = $line
         }
     }
-    git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
-    git push
+    $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
+    if(!($err.contains("fatal") -or $err.contains("failed"))){
+        git push
+        git switch $originalBranch
+        git merge $modificationsBranch
+    }
 
     write-output ""
     write-output ""
