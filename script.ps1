@@ -27,33 +27,38 @@ write-output ""
 
 #merge into original branch
 write-output "MERGE INTO THE EXISTING BRANCHES"
-#inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
-$allBranch = git branch
-write-output "List of branches: $allBranch"
+$keepMerging = "y"
+while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
+    #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
+    $allBranch = git branch
+    write-output "List of branches: $allBranch"
 
-$flagBranchFound = 0
-while(!$flagBranchFound){
-    $originalBranch = read-host "Which branch do you want to merge?"
-    
-    #for all available branches
-    foreach($branchI in $allBranch){
-        if($branchI.contains($originalBranch)){
-            $flagBranchFound = 1
-            write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
+    $flagBranchFound = 0
+    while(!$flagBranchFound){
+        $originalBranch = read-host "Which branch do you want to merge?"
+        
+        #for all available branches
+        foreach($branchI in $allBranch){
+            if($branchI.contains($originalBranch)){
+                $flagBranchFound = 1
+                write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
+            }
         }
+
+        if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
     }
+    git switch $originalBranch
+    git fetch
+    git pull
+    #fine dello stesso pezzo di codice di sopra
 
-    if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
+    git merge $modificationsBranch
+    git push
+
+    $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"    
+    write-output ""
+    write-output ""
 }
-git switch $originalBranch
-git fetch
-git pull
-#fine dello stesso pezzo di codice di sopra
-
-git merge $modificationsBranch
-git push
-write-output ""
-write-output ""
 
 #write-output "MERGE INTO A TEMPORARY BRANCH FROM THE MAIN BRANCH"
 #$fromMain = read-host "What would you like to call the branch from main?"
@@ -143,7 +148,9 @@ git switch $modificationsBranch
 
 
 #TODO
-#chiedere prima di fare la modifica su ogni repo - la stampa della prima repo non avviene subito per qualche motivo
+#usare "contains" rende possibile avere errori di battitura: scrivo che voglio fare il merge su "develo" invece
+    #che "develop" e viene accettato come branch, però poi non riesce a fare correttamente il resto dei passaggi
+#la stampa della prima repo non avviene subito per qualche motivo
 #quando chiedo se vuole allineare la realease di uno dei country, fai la merge
     #direttamente dal develop appena allineato
 #controllo errori
