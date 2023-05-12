@@ -35,8 +35,8 @@ while(!$flagBranchFound){
     
     #for all available branches
     foreach($branchI in $allBranch){
-        #if($branchI.equals("$originalBranch") -or $branchI.equals("* $originalBranch")){
-        if($branchI.equals("$originalBranch")){
+        write-output "$branchI - $originalBranch"
+        if($branchI.equals("$originalBranch") -or $branchI.equals("* $originalBranch")){
             $flagBranchFound = 1
             write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
         }
