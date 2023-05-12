@@ -68,7 +68,8 @@ write-output "MERGE REMOTE REPOSITORIES"
 for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     set-location $remoteRepos[$i]
-    get-location
+    $location = get-location
+    write-output $location
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
@@ -98,6 +99,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             #create the temporary branch and merge into it
             git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
             git switch $modificationsBranch
+            git push -u origin $modificationsBranch
             foreach($line in git remote){
                 if($line -ne "origin"){
                     $parentRepo = $line
@@ -111,6 +113,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 git switch $originalBranch
                 git merge $modificationsBranch
                 git branch -D $modificationsBranch #force the delete
+                git push origin -D $modificationsBranch
             } elseif($err.contains("fatal") -or $err.contains("failed")){
                 write-output "An error occurred, check the messages"
             } else { #can't merge into main, just push the temporary branch
@@ -128,7 +131,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 }
 
 set-location ..\AutomatedGitTool
-
+git switch $modificationsBranch
 
 #chiedere prima di fare la modifica su ogni repo 
 #(potrebbe voler essere fatta solo su un country)
