@@ -3,6 +3,7 @@ cd -> set-location <br>
 echo -> write-output <br>
 ls -> dir, get-childitem <br>
 mkdir -> new-item -name test -itemtype "directory" <br>
+pwd -> get-location
 rm -> remove-item <br>
 touch -> new-item -name file.txt -itemtype "file" <br><br>
 

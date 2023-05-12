@@ -1,4 +1,4 @@
-set-psdebug -trace 0 # Used to show in the command line the executed commands
+set-psdebug -trace 1 # Used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
 
 #getting the remote repositories
@@ -24,8 +24,10 @@ write-output "Current branch: $currentBranch"
 write-output ""
 write-output ""
 
+write-output "MERGE REMOTE REPOSITORIES"
 for($i=0;$i -lt $remoteRepos.Length; $i++){
     set-location $remoteRepos[$i]
+    get-location
     git fetch --all
     git switch $currentBranch
     foreach($line in git remote){
@@ -33,8 +35,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             $parentRepo = $line
         }
     }
-    $result = git merge $parentRepo/$currentBranch --allow-unrelated-history
-    write-output $result
+    git merge $parentRepo/$currentBranch --allow-unrelated-histories
+
+    write-output ""
+    write-output ""
 }
 
 #$allBranch = git branch -a
