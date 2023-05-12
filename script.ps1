@@ -1,3 +1,9 @@
+# USAGE EXAMPLE
+# Create a branch from develop and do there all the modifications. Then start the script
+# This script will publish the branch and push, allowing then to merge into any branch of the template repo.
+# Then it will move on to the remote repos and perform the merge also in there (using the modified branch
+    #from the template repo, it doesn't use the develop branch from the template repo)
+
 set-psdebug -trace 1 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
