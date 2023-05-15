@@ -1,4 +1,4 @@
-set-psdebug -trace 1 #used to show in the command line the executed commands
+set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
 
@@ -15,15 +15,20 @@ write-output $remoteRepos
 write-output ""
 write-output ""
 
+#create log file
+new-item -name "..\log.txt" -itemtype "file"
+
 #commit current changes
 write-output "COMMIT CURRENT CHANGES"
 $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
-git push -u origin $modificationsBranch
-git add .
-git commit -m $commitMessage
-git push
+write-output "git does add, commit and push..."
+git push -u origin $modificationsBranch >> "..\log.txt"
+git add . >> "..\log.txt"
+git commit -m $commitMessage >> "..\log.txt"
+git push >> "..\log.txt"
+write-output "... done"
 write-output ""
 write-output ""
 
@@ -49,13 +54,16 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
 
         if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
     }
-    git switch $originalBranch
-    git fetch
-    git pull
+
+    write-output "Switching into the branch, fetching, merging and pushing..."
+    git switch $originalBranch >> "..\log.txt"
+    git fetch >> "..\log.txt"
+    git pull >> "..\log.txt"
     #fine dello stesso pezzo di codice di sopra
 
-    git merge $modificationsBranch
-    git push
+    git merge $modificationsBranch >> "..\log.txt"
+    git push >> "..\log.txt"
+    write-output "... done"
 
     $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"    
     write-output ""
@@ -82,7 +90,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
-        git fetch --all
+        git fetch --all >> "..\log.txt"
         $keepMerging = "y"
         while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
             #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
@@ -103,15 +111,18 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
                 if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
             }
-            git switch $originalBranch
-            git fetch
-            git pull
+            write-output "Switching into the branch, creating a temporary branch, switching into it..."
+            git switch $originalBranch >> "..\log.txt"
+            git fetch >> "..\log.txt"
+            git pull >> "..\log.txt"
             #fine dello stesso pezzo di codice di sopra
 
             #create the temporary branch and merge into it
             git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
             git switch $modificationsBranch
             git push -u origin $modificationsBranch
+            write-output "... done"
+            write-output "Merging from origin, pushing, deleting temporary branch..."
             foreach($line in git remote){
                 if($line -ne "origin"){
                     $parentRepo = $line
@@ -128,8 +139,9 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
                 git branch -D $modificationsBranch #force the delete
                 git push origin -d $modificationsBranch
+                write-output "... done"
             } elseif($err.contains("fatal") -or $err.contains("failed")){
-                write-output "An error occurred, check the messages"
+                write-output "An error occurred, check the log"
             } else { #can't merge into main, just push the temporary branch
                 git push
 
@@ -146,3 +158,4 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
+remove-item "..\"..\log.txt"" -force
