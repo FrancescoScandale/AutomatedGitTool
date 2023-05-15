@@ -16,19 +16,16 @@ write-output $remoteRepos
 write-output ""
 write-output ""
 
-#create log file
-#new-item -path ..\log.txt -itemtype "file"
-
 #commit current changes
 write-output "COMMIT CURRENT CHANGES"
 $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-$log = git push -u origin $modificationsBranch
-$log = git add .
-$log = git commit -m $commitMessage
-$log = git push
+git push -u origin $modificationsBranch
+git add .
+git commit -m $commitMessage
+git push
 write-output "... done"
 write-output ""
 write-output ""
@@ -160,4 +157,3 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
-#remove-item "..\log.txt"
