@@ -10,24 +10,25 @@ foreach($line in get-content .\config){
 }
 write-output "Current repository location: "
 get-location
+write-output ""
 write-output "Remote repositories location: "
 write-output $remoteRepos
 write-output ""
 write-output ""
 
 #create log file
-new-item -name "..\log.txt" -itemtype "file"
+new-item -path ..\log.txt -itemtype "file"
 
 #commit current changes
 write-output "COMMIT CURRENT CHANGES"
 $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
-write-output "git does add, commit and push..."
-git push -u origin $modificationsBranch >> "..\log.txt"
-git add . >> "..\log.txt"
-git commit -m $commitMessage >> "..\log.txt"
-git push >> "..\log.txt"
+write-output "Git does add, commit and push..."
+git push -u origin $modificationsBranch >> ..\log.txt
+git add . >> ..\log.txt
+git commit -m $commitMessage >> ..\log.txt
+git push >> ..\log.txt
 write-output "... done"
 write-output ""
 write-output ""
@@ -35,11 +36,12 @@ write-output ""
 #ORIGIN REPOSITORY
 write-output "MERGE INTO THE EXISTING BRANCHES"
 get-location
-$allBranch = git branch
-write-output "List of branches: $allBranch"
 $keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
+    $allBranch = git branch
+    write-output "List of branches: $allBranch"
+
     $flagBranchFound = 0
     while(!$flagBranchFound){
         $originalBranch = read-host "Which branch do you want to merge?"
@@ -56,13 +58,13 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     }
 
     write-output "Switching into the branch, fetching, merging and pushing..."
-    git switch $originalBranch >> "..\log.txt"
-    git fetch >> "..\log.txt"
-    git pull >> "..\log.txt"
+    git switch $originalBranch >> ..\log.txt
+    git fetch >> ..\log.txt
+    git pull >> ..\log.txt
     #fine dello stesso pezzo di codice di sopra
 
-    git merge $modificationsBranch >> "..\log.txt"
-    git push >> "..\log.txt"
+    git merge $modificationsBranch >> ..\log.txt
+    git push >> ..\log.txt
     write-output "... done"
 
     $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"    
@@ -90,7 +92,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
-        git fetch --all >> "..\log.txt"
+        git fetch --all >> ..\log.txt
         $keepMerging = "y"
         while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
             #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
@@ -112,9 +114,9 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
             }
             write-output "Switching into the branch, creating a temporary branch, switching into it..."
-            git switch $originalBranch >> "..\log.txt"
-            git fetch >> "..\log.txt"
-            git pull >> "..\log.txt"
+            git switch $originalBranch >> ..\log.txt
+            git fetch >> ..\log.txt
+            git pull >> ..\log.txt
             #fine dello stesso pezzo di codice di sopra
 
             #create the temporary branch and merge into it
@@ -158,4 +160,4 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
-remove-item "..\"..\log.txt"" -force
+remove-item "..\..\log.txt" -force
