@@ -1,8 +1,6 @@
-set-psdebug -trace 0 #used to show in the command line the executed commands
+set-psdebug -trace 1 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
-
-new-item -name "log.txt" -itemtype "file"
 
 #getting the remote repositories
 #config file uses global paths
