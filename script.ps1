@@ -2,9 +2,7 @@ set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
 
-
-Stop-Transcript | out-null
-Start-Transcript -path .\log.txt -append
+new-item -name "log.txt" -itemtype "file"
 
 #getting the remote repositories
 #config file uses global paths
@@ -150,5 +148,3 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
-
-Stop-Transcript
