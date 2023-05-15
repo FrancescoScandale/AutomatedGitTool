@@ -1,10 +1,4 @@
-# USAGE EXAMPLE
-# Create a branch from develop and do there all the modifications. Then start the script
-# This script will publish the branch and push, allowing then to merge into any branch of the template repo.
-# Then it will move on to the remote repos and perform the merge also in there (using the modified branch
-    #from the template repo, it doesn't use the develop branch from the template repo)
-
-set-psdebug -trace 1 #used to show in the command line the executed commands
+set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
 
@@ -14,6 +8,8 @@ $remoteRepos = @()
 foreach($line in get-content .\config){
     $remoteRepos = $remoteRepos + $line
 }
+write-output "Current repository location: "
+get-location
 write-output "Remote repositories location: "
 write-output $remoteRepos
 write-output ""
@@ -31,14 +27,14 @@ git push
 write-output ""
 write-output ""
 
-#merge into original branch
+#ORIGIN REPOSITORY
 write-output "MERGE INTO THE EXISTING BRANCHES"
-$keepMerging = "y"
+get-location
+$allBranch = git branch
+write-output "List of branches: $allBranch"
+$keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
-    $allBranch = git branch
-    write-output "List of branches: $allBranch"
-
     $flagBranchFound = 0
     while(!$flagBranchFound){
         $originalBranch = read-host "Which branch do you want to merge?"
@@ -82,8 +78,7 @@ write-output "MERGE REMOTE REPOSITORIES"
 for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     set-location $remoteRepos[$i]
-    $location = get-location
-    write-output $location
+    get-location
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
@@ -151,14 +146,3 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
-
-
-#TODO
-#usare "contains" rende possibile avere errori di battitura: scrivo che voglio fare il merge su "develo" invece
-    #che "develop" e viene accettato come branch, però poi non riesce a fare correttamente il resto dei passaggi
-    #CONVIENE PROVARE A USARE -like AL POSTO DI CONTAINS
-#la stampa della prima repo non avviene subito per qualche motivo
-#quando chiedo se vuole allineare la realease di uno dei country, fai la merge
-    #direttamente dal develop appena allineato
-#controllo errori
-#creazione delle pull-request direttamente da riga di comando?
