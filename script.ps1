@@ -46,9 +46,10 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
         #for all available branches
         foreach($branchI in $allBranch){
             #if($branchI.contains($originalBranch)){
-            if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch")){
+            if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch") -or $branchI.equals("  remotes/origin/$originalBranch")){
                 $flagBranchFound = 1
                 write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
+                break
             }
         }
 
@@ -104,9 +105,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 #for all available branches
                 foreach($branchI in $allBranch){
                     #if($branchI.contains($originalBranch)){
-                    if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch")){
+                    if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch") -or $branchI.equals("  remotes/origin/$originalBranch")){
                         $flagBranchFound = 1
                         write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
+                        break
                     }
                 }
 
@@ -118,10 +120,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             git pull
             #fine dello stesso pezzo di codice di sopra
 
-            if($originalBranch.contains("release")){
-                $temporaryBranch = $modificationsBranch
-                $modificationsBranch = "develop"
-            } else {
+            if(!$originalBranch.contains("release")){
                 #create the temporary branch and merge into it
                 git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
                 git switch $modificationsBranch
@@ -135,7 +134,11 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                     $parentRepo = $line
                 }
             }
-            $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
+            if($originalBranch.contains("release")){ #if in release, merge directly the local (aligned) develop
+                $err = git merge develop --allow-unrelated-histories
+            } else {
+                $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
+            }
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
                 git push
                 
@@ -156,10 +159,6 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 git push
 
                 write-output "To merge back into main, need to create a pull request from GitHub"
-            }
-
-            if($originalBranch.contains("release")){
-                $modificationsBranch = $temporaryBranch
             }
 
             $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"
