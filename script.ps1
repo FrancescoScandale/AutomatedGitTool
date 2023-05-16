@@ -9,7 +9,7 @@ foreach($line in get-content .\config){
     $remoteRepos = $remoteRepos + $line
 }
 write-output "Current repository location: "
-$pwd
+get-location -psdrive C
 write-output ""
 write-output "Remote repositories location: "
 write-output $remoteRepos
@@ -32,7 +32,7 @@ write-output ""
 
 #ORIGIN REPOSITORY
 write-output "MERGE INTO THE EXISTING BRANCHES"
-$pwd
+get-location -psdrive C
 $keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
@@ -86,7 +86,7 @@ write-output "MERGE REMOTE REPOSITORIES"
 for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     set-location $remoteRepos[$i]
-    $pwd
+    get-location -psdrive C
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
