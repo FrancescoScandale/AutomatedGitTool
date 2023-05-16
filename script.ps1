@@ -22,7 +22,7 @@ $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-git push -u origin $modificationsBranch
+git push -u origin $modificationsBranch --porcelain
 git add .
 git commit -m $commitMessage --porcelain
 git push --porcelain
@@ -70,17 +70,17 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
         if(!$originalBranch.contains("release")){
             #merge back into the original branch
             git switch $originalBranch
-            git merge $modificationsBranch
+            git merge $modificationsBranch --quiet
             git push --porcelain
         }
 
         write-output "... done"
     } elseif($err.contains("fatal") -or $err.contains("failed")){
-        write-output "An error occurred, check the term"
+        write-output "...an error occurred, check the terminal"
     } else { #can't merge into main, just push the temporary branch
         git push --porcelain
 
-        write-output "To merge back into main, need to create a pull request from GitHub"
+        write-output "...to merge back into main, need to create a pull request from GitHub"
     }
     write-output "... done"
 
@@ -89,15 +89,6 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     write-output ""
 }
 
-#write-output "MERGE INTO A TEMPORARY BRANCH FROM THE MAIN BRANCH"
-#$fromMain = read-host "What would you like to call the branch from main?"
-#git switch main
-#git fetch --quiet
-#git pull --quiet
-#git branch $fromMain
-#git switch $fromMain
-#git merge ###########
-#git push -u origin $fromMain
 
 
 #REMOTE REPOSITORIES
@@ -141,7 +132,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 #create the temporary branch and merge into it
                 git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
                 git switch $modificationsBranch
-                git push -u origin $modificationsBranch
+                git push -u origin $modificationsBranch --porcelain
             }
             write-output "... done"
 
@@ -162,20 +153,20 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 if(!$originalBranch.contains("release")){
                     #merge back into the original branch
                     git switch $originalBranch
-                    git merge $modificationsBranch
+                    git merge $modificationsBranch --quiet
                     git push --porcelain
 
                     git branch -D $modificationsBranch #force the delete
-                    git push origin -d $modificationsBranch
+                    git push origin -d $modificationsBranch --porcelain
                 }
 
                 write-output "... done"
             } elseif($err.contains("fatal") -or $err.contains("failed")){
-                write-output "An error occurred, check the log"
+                write-output "...an error occurred, check the terminal"
             } else { #can't merge into main, just push the temporary branch
                 git push --porcelain
 
-                write-output "To merge back into main, need to create a pull request from GitHub"
+                write-output "...to merge back into main, need to create a pull request from GitHub"
             }
 
             $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"
