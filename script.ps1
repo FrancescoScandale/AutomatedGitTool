@@ -63,7 +63,7 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     git fetch --quiet
     git pull --quiet
 
-    $err = git merge $modificationsBranch --quiet
+    $err = git merge $modificationsBranch
     if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
         git push --quiet
         
@@ -137,14 +137,14 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
             write-output "Merging from origin, pushing, deleting temporary branch..."
             if($originalBranch.contains("release")){ #if in release, merge directly the local (aligned) develop
-                $err = git merge develop --allow-unrelated-histories --quiet
+                $err = git merge develop --allow-unrelated-histories
             } else {
                 foreach($line in git remote){
                     if($line -ne "origin"){
                         $parentRepo = $line
                     }
                 }
-                $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories --quiet
+                $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
             }
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
                 git push --quiet
