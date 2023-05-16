@@ -33,7 +33,7 @@ write-output ""
 #ORIGIN REPOSITORY
 write-output "MERGE INTO THE EXISTING BRANCHES"
 split-path -path $pwd -leaf
-git fetch --all
+git fetch --all --quiet
 
 $keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
@@ -60,8 +60,8 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
 
     write-output "Switching into the branch, fetching, merging and pushing..."
     git switch $originalBranch
-    git fetch
-    git pull
+    git fetch --quiet
+    git pull --quiet
 
     $err = git merge $modificationsBranch
     if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
@@ -95,8 +95,8 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
 #write-output "MERGE INTO A TEMPORARY BRANCH FROM THE MAIN BRANCH"
 #$fromMain = read-host "What would you like to call the branch from main?"
 #git switch main
-#git fetch
-#git pull
+#git fetch --quiet
+#git pull --quiet
 #git branch $fromMain
 #git switch $fromMain
 #git merge ###########
@@ -109,7 +109,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
-    git fetch --all
+    git fetch --all --quiet
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
@@ -137,8 +137,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             }
             write-output "Switching into the branch, creating a temporary branch, switching into it..."
             git switch $originalBranch
-            git fetch
-            git pull
+            git fetch --quiet
+            git pull --quiet
 
             if(!$originalBranch.contains("release")){
                 #create the temporary branch and merge into it
