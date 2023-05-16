@@ -22,10 +22,10 @@ $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-git push -u origin $modificationsBranch >> ..\log.txt
-git add . >> ..\log.txt
-git commit -m $commitMessage >> ..\log.txt
-git push >> ..\log.txt
+git push -u origin $modificationsBranch
+git add .
+git commit -m $commitMessage --porcelain
+git push --porcelain
 write-output "... done"
 write-output ""
 write-output ""
@@ -37,7 +37,6 @@ git fetch --all
 
 $keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
-    #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
     $allBranch = git branch
     write-output "List of branches:"
     git branch -a
@@ -63,10 +62,29 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     git switch $originalBranch
     git fetch
     git pull
-    #fine dello stesso pezzo di codice di sopra
 
-    git merge $modificationsBranch
-    git push
+    $err = git merge $modificationsBranch
+    if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
+        git push --porcelain
+        
+        if(!$originalBranch.contains("release")){
+            #merge back into the original branch
+            git switch $originalBranch
+            git merge $modificationsBranch
+            git push --porcelain
+
+            git branch -D $modificationsBranch #force the delete
+            git push origin -d $modificationsBranch
+        }
+
+        write-output "... done"
+    } elseif($err.contains("fatal") -or $err.contains("failed")){
+        write-output "An error occurred, check the log"
+    } else { #can't merge into main, just push the temporary branch
+        git push --porcelain
+
+        write-output "To merge back into main, need to create a pull request from GitHub"
+    }
     write-output "... done"
 
     $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"    
@@ -97,7 +115,6 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
     if($consent.equals("y") -or $consent.equals("Y")){
         $keepMerging = "y"
         while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
-            #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
             $allBranch = git branch -a
             write-output "List of branches:"
             git branch -a
@@ -122,7 +139,6 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             git switch $originalBranch
             git fetch
             git pull
-            #fine dello stesso pezzo di codice di sopra
 
             if(!$originalBranch.contains("release")){
                 #create the temporary branch and merge into it
@@ -144,13 +160,13 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
             }
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
-                git push
+                git push --porcelain
                 
                 if(!$originalBranch.contains("release")){
                     #merge back into the original branch
                     git switch $originalBranch
                     git merge $modificationsBranch
-                    git push
+                    git push --porcelain
 
                     git branch -D $modificationsBranch #force the delete
                     git push origin -d $modificationsBranch
@@ -160,7 +176,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             } elseif($err.contains("fatal") -or $err.contains("failed")){
                 write-output "An error occurred, check the log"
             } else { #can't merge into main, just push the temporary branch
-                git push
+                git push --porcelain
 
                 write-output "To merge back into main, need to create a pull request from GitHub"
             }
