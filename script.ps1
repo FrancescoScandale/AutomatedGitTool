@@ -22,10 +22,10 @@ $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-git push -u origin $modificationsBranch
-git add .
-git commit -m $commitMessage
-git push
+git push -u origin $modificationsBranch | out-file -filepath ..\log.txt -append
+git add . | out-file -filepath ..\log.txt -append
+git commit -m $commitMessage | out-file -filepath ..\log.txt -append
+git push | out-file -filepath ..\log.txt -append
 write-output "... done"
 write-output ""
 write-output ""
