@@ -36,7 +36,7 @@ split-path -path $pwd -leaf
 $keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
-    $allBranch = git branch
+    $allBranch = git branch -a
     write-output "List of branches: $allBranch"
 
     $flagBranchFound = 0
@@ -95,7 +95,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
         $keepMerging = "y"
         while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
             #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
-            $allBranch = git branch
+            $allBranch = git branch -a
             write-output "List of branches: $allBranch"
 
             $flagBranchFound = 0
