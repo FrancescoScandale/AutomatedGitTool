@@ -33,11 +33,14 @@ write-output ""
 #ORIGIN REPOSITORY
 write-output "MERGE INTO THE EXISTING BRANCHES"
 split-path -path $pwd -leaf
+git fetch --all
+
 $keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
 while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
-    $allBranch = git branch -a
-    write-output "List of branches: $allBranch"
+    $allBranch = git branch
+    write-output "List of branches:"
+    git branch -a
 
     $flagBranchFound = 0
     while(!$flagBranchFound){
@@ -88,15 +91,16 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
+    git fetch --all
 
     $consent = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($consent.equals("y") -or $consent.equals("Y")){
-        git fetch --all
         $keepMerging = "y"
         while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
             #inizio dello stesso pezzo di codice di sopra: vedere se fare una funzione
             $allBranch = git branch -a
-            write-output "List of branches: $allBranch"
+            write-output "List of branches:"
+            git branch -a
 
             $flagBranchFound = 0
             while(!$flagBranchFound){
