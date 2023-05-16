@@ -45,7 +45,8 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
         
         #for all available branches
         foreach($branchI in $allBranch){
-            if($branchI.contains($originalBranch)){
+            #if($branchI.contains($originalBranch)){
+            if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch")){
                 $flagBranchFound = 1
                 write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
             }
@@ -102,7 +103,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 
                 #for all available branches
                 foreach($branchI in $allBranch){
-                    if($branchI.contains($originalBranch)){
+                    #if($branchI.contains($originalBranch)){
+                    if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch")){
                         $flagBranchFound = 1
                         write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
                     }
