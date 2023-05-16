@@ -22,10 +22,10 @@ $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-git push -u origin $modificationsBranch
-git add .
-git commit -m $commitMessage
-git push
+git push -u origin $modificationsBranch >> ..\log.txt
+git add . >> ..\log.txt
+git commit -m $commitMessage >> ..\log.txt
+git push >> ..\log.txt
 write-output "... done"
 write-output ""
 write-output ""
@@ -130,17 +130,17 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 git switch $modificationsBranch
                 git push -u origin $modificationsBranch
             }
-            
             write-output "... done"
+
             write-output "Merging from origin, pushing, deleting temporary branch..."
-            foreach($line in git remote){
-                if($line -ne "origin"){
-                    $parentRepo = $line
-                }
-            }
             if($originalBranch.contains("release")){ #if in release, merge directly the local (aligned) develop
                 $err = git merge develop --allow-unrelated-histories
             } else {
+                foreach($line in git remote){
+                    if($line -ne "origin"){
+                        $parentRepo = $line
+                    }
+                }
                 $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
             }
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
