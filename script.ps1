@@ -72,14 +72,11 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
             git switch $originalBranch
             git merge $modificationsBranch
             git push --porcelain
-
-            git branch -D $modificationsBranch #force the delete
-            git push origin -d $modificationsBranch
         }
 
         write-output "... done"
     } elseif($err.contains("fatal") -or $err.contains("failed")){
-        write-output "An error occurred, check the log"
+        write-output "An error occurred, check the term"
     } else { #can't merge into main, just push the temporary branch
         git push --porcelain
 
