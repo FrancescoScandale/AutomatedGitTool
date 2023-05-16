@@ -118,10 +118,16 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             git pull
             #fine dello stesso pezzo di codice di sopra
 
-            #create the temporary branch and merge into it
-            git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
-            git switch $modificationsBranch
-            git push -u origin $modificationsBranch
+            if($originalBranch.contains("release")){
+                $temporaryBranch = $modificationsBranch
+                $modificationsBranch = "develop"
+            } else {
+                #create the temporary branch and merge into it
+                git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
+                git switch $modificationsBranch
+                git push -u origin $modificationsBranch
+            }
+            
             write-output "... done"
             write-output "Merging from origin, pushing, deleting temporary branch..."
             foreach($line in git remote){
@@ -132,14 +138,17 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
                 git push
+                
+                if(!$originalBranch.contains("release")){
+                    #merge back into the original branch
+                    git switch $originalBranch
+                    git merge $modificationsBranch
+                    git push
 
-                #merge back into the original branch
-                git switch $originalBranch
-                git merge $modificationsBranch
-                git push
+                    git branch -D $modificationsBranch #force the delete
+                    git push origin -d $modificationsBranch
+                }
 
-                git branch -D $modificationsBranch #force the delete
-                git push origin -d $modificationsBranch
                 write-output "... done"
             } elseif($err.contains("fatal") -or $err.contains("failed")){
                 write-output "An error occurred, check the log"
@@ -147,6 +156,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 git push
 
                 write-output "To merge back into main, need to create a pull request from GitHub"
+            }
+
+            if($originalBranch.contains("release")){
+                $modificationsBranch = $temporaryBranch
             }
 
             $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"
