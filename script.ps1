@@ -2,7 +2,7 @@ set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
 
-#getting the remote repositories
+#getting the repositories from config file
 #config file uses global paths
 $remoteRepos = @()
 foreach($line in get-content .\config){
