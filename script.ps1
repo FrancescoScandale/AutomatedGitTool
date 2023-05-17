@@ -63,7 +63,7 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     git pull --quiet
 
     $err = git merge $modificationsBranch
-    if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
+    if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
         git push --quiet
         
         if(!$originalBranch.contains("release")){
@@ -74,7 +74,7 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
         }
 
         write-output "... done"
-    } elseif($err.contains("fatal") -or $err.contains("failed")){
+    } elseif(!(!($err -like "*fatal*") -and !($err -like "*failed*"))){
         write-output "...an error occurred, check the terminal"
     } else { #can't merge into main, just push the temporary branch
         git push --quiet
@@ -151,7 +151,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             write-output ""
 
             #if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
-            if(!($err -like "fatal") -and !($err -like "fatal") -and !($originalBranch.contains("main"))){
+            if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
                 git push --quiet
 
                 write-output ""
@@ -169,7 +169,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 }
 
                 write-output "... done"
-            } elseif(!(!($err -like "fatal") -and !($err -like "fatal"))){
+            } elseif(!(!($err -like "*fatal*") -and !($err -like "*failed*"))){
                 write-output ""
                 write-output "HERE3 - $err"
                 write-output ""
