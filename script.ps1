@@ -61,16 +61,13 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     git fetch --quiet
     git pull --quiet
 
-    $err = git merge $modificationsBranch
+    if($originalBranch -like "*release*"){ #if in release, merge directly the local (aligned) develop
+        $err = git merge develop
+    } else {
+        $err = git merge $modificationsBranch
+    }
     if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
         git push --quiet
-        
-        if(!$originalBranch.contains("release")){
-            #merge back into the original branch
-            git switch $originalBranch
-            git merge $modificationsBranch --quiet
-            git push --quiet
-        }
 
         write-output "... done"
     } elseif(!(!($err -like "*fatal*") -and !($err -like "*failed*"))){
@@ -79,7 +76,6 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
     } else { #can't merge into main, just push the temporary branch
         git push --quiet
 
-        write-output "ERROR - $err"
         write-output "...to merge back into main, need to create a pull request from GitHub"
     }
     write-output ""
@@ -126,11 +122,11 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             git fetch --quiet
             git pull --quiet
 
-            if(!$originalBranch.contains("release")){
-                $temporaryBranch = $modificationsBranch
+            if(!($originalBranch -like "*release*")){
                 #create the temporary branch and merge into it
+                $temporaryBranch = $modificationsBranch
                 $tst = git branch $temporaryBranch
-                while($null -ne $tst){
+                while($null -ne $tst){ #check if branch already exists
                     $temporaryBranch = read-host "A branch with that name alrady exists, provide a new branch name"
                     $tst = git branch $temporaryBranch
                 }
@@ -140,7 +136,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             write-output "... done"
 
             write-output "Merging from origin, pushing, deleting temporary branch..."
-            if($originalBranch.contains("release")){ #if in release, merge directly the local (aligned) develop
+            if($originalBranch -like "*release*"){ #if in release, merge directly the local (aligned) develop
                 $err = git merge develop --allow-unrelated-histories
             } else {
                 foreach($line in git remote){
@@ -153,10 +149,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
                 git push --quiet
 
-                if(!$originalBranch.contains("release")){
+                if(!($originalBranch -like "*release*")){
                     #merge back into the original branch
                     git switch $originalBranch
-                    git merge $modificationsBranch --quiet
+                    git merge $temporaryBranch --quiet
                     git push --quiet
                     
                     #delete temporary branch
@@ -189,7 +185,7 @@ git switch $modificationsBranch
 
 $consent = read-host "If you want to delete the branch $modificationsBranch insert [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
-    if($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or $modificationsBranch.contains("release")){
+    if($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or ($modificationsBranch -like "*release*")){
         write-output "Can't delete this branch!"
     } else {
         git switch develop
