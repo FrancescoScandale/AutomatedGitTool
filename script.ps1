@@ -46,7 +46,6 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
         
         #for all available branches
         foreach($branchI in $allBranch){
-            #if($branchI.contains($originalBranch)){
             if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch") -or $branchI.equals("  remotes/origin/$originalBranch")){
                 $flagBranchFound = 1
                 write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
@@ -75,10 +74,12 @@ while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
 
         write-output "... done"
     } elseif(!(!($err -like "*fatal*") -and !($err -like "*failed*"))){
+        write-output "ERROR - $err"
         write-output "...an error occurred, check the terminal"
     } else { #can't merge into main, just push the temporary branch
         git push --quiet
 
+        write-output "ERROR - $err"
         write-output "...to merge back into main, need to create a pull request from GitHub"
     }
     write-output ""
@@ -111,7 +112,6 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 
                 #for all available branches
                 foreach($branchI in $allBranch){
-                    #if($branchI.contains($originalBranch)){
                     if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch") -or $branchI.equals("  remotes/origin/$originalBranch")){
                         $flagBranchFound = 1
                         write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
@@ -128,7 +128,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
             if(!$originalBranch.contains("release")){
                 #create the temporary branch and merge into it
-                git branch $modificationsBranch #(check: if the result of this command is not empty, another branch already has this name -> need to create it with another name)
+                git branch $modificationsBranch
                 git switch $modificationsBranch
                 git push -u origin $modificationsBranch --quiet
             }
@@ -145,18 +145,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 }
                 $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
             }
-
-            write-output ""
-            write-output "HERE1 - $err"
-            write-output ""
-
-            #if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
             if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
                 git push --quiet
-
-                write-output ""
-                write-output "HERE2 - $err"
-                write-output ""
 
                 if(!$originalBranch.contains("release")){
                     #merge back into the original branch
@@ -170,21 +160,16 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
                 write-output "... done"
             } elseif(!(!($err -like "*fatal*") -and !($err -like "*failed*"))){
-                write-output ""
-                write-output "HERE3 - $err"
-                write-output ""
-
+                write-output "ERROR - $err"
                 write-output "...an error occurred, check the terminal"
             } else { #can't merge into main, just push the temporary branch
-                write-output ""
-                write-output "HERE4 - $err"
-                write-output ""
-
                 git push --quiet
 
+                write-output "ERROR - $err"
                 write-output "...to merge back into main, need to create a pull request from GitHub"
             }
 
+            write-output ""
             $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"
         }
     }
