@@ -177,3 +177,14 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
 set-location ..\AutomatedGitTool
 git switch $modificationsBranch
+
+$consent = read-host "Do you want to delete the branch $modificationsBranch? [y or Y if yes, any other if no]"
+if($consent.equals("y") -or $consent.equals("Y")){
+    if($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or $modificationsBranch.contains("release")){
+        write-output "Can't delete this branch!"
+    } else {
+        git switch main
+        git branch -D $modificationsBranch #force the delete
+        git push origin -d $modificationsBranch --quiet
+    }
+}
