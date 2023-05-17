@@ -127,10 +127,15 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             git pull --quiet
 
             if(!$originalBranch.contains("release")){
+                $temporaryBranch = $modificationsBranch
                 #create the temporary branch and merge into it
-                git branch $modificationsBranch
-                git switch $modificationsBranch
-                git push -u origin $modificationsBranch --quiet
+                $tst = git branch $temporaryBranch
+                while($null -ne $tst){
+                    $temporaryBranch = read-host "A branch with that name alrady exists, provide a new branch name"
+                    $tst = git branch $temporaryBranch
+                }
+                git switch $temporaryBranch
+                git push -u origin $temporaryBranch --quiet
             }
             write-output "... done"
 
@@ -153,9 +158,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                     git switch $originalBranch
                     git merge $modificationsBranch --quiet
                     git push --quiet
-
-                    git branch -D $modificationsBranch #force the delete
-                    git push origin -d $modificationsBranch --quiet
+                    
+                    #delete temporary branch
+                    git branch -D $temporaryBranch #force the delete
+                    git push origin -d $temporaryBranch --quiet
                 }
 
                 write-output "... done"
