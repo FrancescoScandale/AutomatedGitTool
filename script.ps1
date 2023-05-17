@@ -183,7 +183,7 @@ if($consent.equals("y") -or $consent.equals("Y")){
     if($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or $modificationsBranch.contains("release")){
         write-output "Can't delete this branch!"
     } else {
-        git switch main
+        git switch develop
         git branch -D $modificationsBranch #force the delete
         git push origin -d $modificationsBranch --quiet
     }
