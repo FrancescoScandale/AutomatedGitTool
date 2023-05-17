@@ -125,20 +125,20 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             if(!($originalBranch -like "*release*")){
                 #create the temporary branch and merge into it
                 $temporaryBranch = $modificationsBranch
-                $branchNotExists = 0
+                $branchNotExists = $false
                 while(!$branchNotExists){ #check if branch already exists
                     foreach($branchI in $allBranch){
                         if($branchI.equals("  $temporaryBranch") -or $branchI.equals("* $temporaryBranch") -or $branchI.equals("  remotes/origin/$temporaryBranch")){
-                            $branchNotExists = 1
-                            $temporaryBranch = read-host "A branch with that name alrady exists, provide a new temporary branch name"
+                            $branchNotExists = $true
+                            $temporaryBranch = read-host "A branch with the name $temporaryBranch alrady exists, provide a new temporary branch name"
                             break
                         }
                     }
 
                     write-output "INSIDE1 - $branchNotExists"
 
-                    if($branchNotExists -eq 1){ #if branch found, repeat the control
-                        $branchNotExists = 0
+                    if($branchNotExists -eq $true){ #if branch found, repeat the control
+                        $branchNotExists = $false
                     }
 
                     write-output "INSIDE2 - $branchNotExists"
