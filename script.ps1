@@ -145,9 +145,14 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 }
                 $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
             }
+
+            write-output ""
+            write-output "HERE1 - $err"
+            write-output ""
+
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
                 git push --quiet
-                
+
                 if(!$originalBranch.contains("release")){
                     #merge back into the original branch
                     git switch $originalBranch
