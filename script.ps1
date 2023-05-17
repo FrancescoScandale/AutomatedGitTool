@@ -153,6 +153,10 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
                 git push --quiet
 
+                write-output ""
+                write-output "HERE2 - $err"
+                write-output ""
+
                 if(!$originalBranch.contains("release")){
                     #merge back into the original branch
                     git switch $originalBranch
@@ -165,8 +169,16 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
                 write-output "... done"
             } elseif($err.contains("fatal") -or $err.contains("failed")){
+                write-output ""
+                write-output "HERE3 - $err"
+                write-output ""
+
                 write-output "...an error occurred, check the terminal"
             } else { #can't merge into main, just push the temporary branch
+                write-output ""
+                write-output "HERE4 - $err"
+                write-output ""
+
                 git push --quiet
 
                 write-output "...to merge back into main, need to create a pull request from GitHub"
