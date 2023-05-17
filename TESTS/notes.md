@@ -33,3 +33,6 @@ touch -> new-item -name file.txt -itemtype "file" <br><br>
         - git merge RemoteRepoName/BranchName --allow-unrelated-histories
 - Disable paging in the branch command
     - git config --global pager.branch false
+- Remove branches that have been deleted from remote repositories
+    - git fetch -a -p
+    - (i.e. git fetch --all --prune)
