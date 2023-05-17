@@ -137,12 +137,11 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
 
                     if($branchNotExists -eq 1){ #if branch found, repeat the control
                         $branchNotExists = 0
-                    } else { #if branch not found, create the new branch
-                        git branch $temporaryBranch
-                        git switch $temporaryBranch
-                        git push -u origin $temporaryBranch --quiet
                     }
                 }
+                git branch $temporaryBranch
+                git switch $temporaryBranch
+                git push -u origin $temporaryBranch --quiet
             }
             write-output "... done"
 
