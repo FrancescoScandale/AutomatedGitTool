@@ -126,7 +126,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 #create the temporary branch and merge into it
                 $temporaryBranch = $modificationsBranch
                 $tst = git branch $temporaryBranch
-                while($null -ne $tst){ #check if branch already exists
+                while($tst -like "*fatal*"){ #check if branch already exists
                     $temporaryBranch = read-host "A branch with that name alrady exists, provide a new branch name"
                     $tst = git branch $temporaryBranch
                 }
