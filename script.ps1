@@ -135,11 +135,13 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                         }
                     }
 
+                    write-output "INSIDE1 - $branchNotExists"
+
                     if($branchNotExists -eq 1){ #if branch found, repeat the control
                         $branchNotExists = 0
                     }
 
-                    write-output "INSIDE"
+                    write-output "INSIDE2 - $branchNotExists"
                 }
                 git branch $temporaryBranch
                 git switch $temporaryBranch
