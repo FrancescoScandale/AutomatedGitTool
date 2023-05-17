@@ -147,10 +147,11 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             }
             write-output "... done"
 
-            write-output "Merging from origin, pushing, deleting temporary branch..."
             if($originalBranch -like "*release*"){ #if in release, merge directly the local (aligned) develop
+                write-output "Merging from develop, pushing..."
                 $err = git merge develop --allow-unrelated-histories
             } else {
+                write-output "Merging from origin, pushing, deleting temporary branch..."
                 foreach($line in git remote){
                     if($line -ne "origin"){
                         $parentRepo = $line
