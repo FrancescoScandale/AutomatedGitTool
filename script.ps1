@@ -150,7 +150,8 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
             write-output "HERE1 - $err"
             write-output ""
 
-            if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
+            #if(!($err.contains("fatal") -or $err.contains("failed")) -and !($originalBranch.contains("main"))){
+            if(!($err -like "fatal") -and !($err -like "fatal") -and !($originalBranch.contains("main"))){
                 git push --quiet
 
                 write-output ""
@@ -168,7 +169,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 }
 
                 write-output "... done"
-            } elseif($err.contains("fatal") -or $err.contains("failed")){
+            } elseif(!(!($err -like "fatal") -and !($err -like "fatal"))){
                 write-output ""
                 write-output "HERE3 - $err"
                 write-output ""
