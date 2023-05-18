@@ -51,6 +51,8 @@ function TemporaryBranchCreation {
     git branch $temporaryBranch #create temporaryBranch
     git switch $temporaryBranch
     git push -u origin $temporaryBranch --quiet
+
+    return $temporaryBranch
 }
 
 #getting the repositories from config file (which contains the global paths)
@@ -101,7 +103,7 @@ write-output ""
 $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
     $temporaryBranch = ""
-    TemporaryBranchCreation $temporaryBranch
+    $temporaryBranch = TemporaryBranchCreation $temporaryBranch
     write-output "Temporary branch -> $temporaryBranch"
     LocalMerge $temporaryBranch $modificationsBranch
 }
