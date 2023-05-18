@@ -1,4 +1,4 @@
-set-psdebug -trace 1 #used to show in the command line the executed commands
+#set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
 
@@ -124,7 +124,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
     if($needAlign.equals("y") -or $needAlign.equals("Y")){
         $consent = read-host "Do you want to align the branch ""develop""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
-            LocalMerge "develop" "remotes/$mainRepoName/develop"
+            LocalMerge "develop" "$mainRepoName/develop"
         }
         write-output ""
 
@@ -139,7 +139,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
             write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
             $temporaryBranch = ""
             $temporaryBranch = TemporaryBranchCreation $temporaryBranch
-            LocalMerge $temporaryBranch "remotes/$mainRepoName/main"
+            LocalMerge $temporaryBranch "$mainRepoName/main"
         }
     }
     write-output ""
