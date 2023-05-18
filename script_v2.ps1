@@ -7,7 +7,6 @@ function LocalMerge {
         [string]$mergeInto,[string]$mergeFrom
     )
 
-    write-output "$mergeInto"
     git switch $mergeInto
     git fetch --quiet
     git pull --quiet
@@ -69,6 +68,8 @@ write-output $remoteRepos
 write-output ""
 write-output ""
 
+$mainRepoName = split-path -path $pwd -leaf
+
 #commit current changes
 write-output "COMMIT CURRENT CHANGES"
 $modificationsBranch = git branch --show-current #retrieve current branch
@@ -105,7 +106,6 @@ if($consent.equals("y") -or $consent.equals("Y")){
     write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = ""
     $temporaryBranch = TemporaryBranchCreation $temporaryBranch
-    write-output "Temporary branch -> $temporaryBranch"
     LocalMerge $temporaryBranch $modificationsBranch
 }
 write-output ""
@@ -123,7 +123,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
     if($needAlign.equals("y") -or $needAlign.equals("Y")){
         $consent = read-host "Do you want to align the branch ""develop""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
-            LocalMerge "develop" "origin/develop"
+            LocalMerge "develop" "remotes/$mainRepoName/develop"
         }
         write-output ""
 
@@ -138,8 +138,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
             write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
             $temporaryBranch = ""
             TemporaryBranchCreation $temporaryBranch
-            write-output "Temporary branch -> $temporaryBranch"
-            LocalMerge $temporaryBranch "origin/main"
+            LocalMerge $temporaryBranch "remotes/$mainRepoName/main"
         }
     }
     write-output ""
