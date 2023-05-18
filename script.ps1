@@ -157,15 +157,16 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                         $parentRepo = $line
                     }
                 }
-                $err = git merge $parentRepo/$modificationsBranch --allow-unrelated-histories
+                $err = git merge $parentRepo/develop --allow-unrelated-histories
             }
             if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
+                write-output "$err"
                 git push --quiet
 
                 if(!($originalBranch -like "*release*")){
                     #merge back into the original branch
                     git switch $originalBranch
-                    git merge $temporaryBranch --quiet
+                    git merge $temporaryBranch
                     git push --quiet
                     
                     #delete temporary branch
@@ -178,6 +179,7 @@ for($i=0;$i -lt $remoteRepos.Length; $i++){
                 write-output "ERROR - $err"
                 write-output "...an error occurred, check the terminal"
             } else { #can't merge into main, just push the temporary branch
+                write-output "$err"
                 git push --quiet
 
                 write-output "ERROR - $err"
