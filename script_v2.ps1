@@ -27,8 +27,9 @@ function LocalMerge {
 }
 
 function TemporaryBranchCreation {
-    param([string[]]$temporaryBranch)
+    param([string]$temporaryBranch)
 
+    $allBranch = git branch -a
     write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = read-host "Insert the name for a temporary branch"
     $branchNotExists = $false
