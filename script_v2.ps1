@@ -16,7 +16,6 @@ function LocalMerge {
     write-output "Summary of the merge, merging and pushing... "
     if(!($err -like "*fatal*") -and !($err -like "*failed*")){
         write-output "$err"
-        write-output ""
         git push --quiet
 
         write-output "... done"
@@ -48,6 +47,7 @@ function TemporaryBranchCreation {
         }
     }
     
+    git switch main
     git branch $temporaryBranch #create temporaryBranch
     git switch $temporaryBranch
     git push -u origin $temporaryBranch --quiet
@@ -88,7 +88,7 @@ write-output ""
 #ORIGIN REPOSITORY
 write-output "ALIGN CURRENT REPOSITORY"
 split-path -path $pwd -leaf
-git fetch --all --quiet
+git fetch --all --prune --quiet
 
 $consent = read-host "Do you want to merge into branch ""develop""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
@@ -118,7 +118,7 @@ write-output "ALIGN REMOTE REPOSITORIES"
 for($i=1;$i -lt $remoteRepos.Length; $i++){
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
-    git fetch --all --quiet
+    git fetch --all --prune --quiet
 
     $needAlign = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
     if($needAlign.equals("y") -or $needAlign.equals("Y")){
