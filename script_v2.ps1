@@ -79,7 +79,7 @@ write-output ""
 write-output ""
 
 #ORIGIN REPOSITORY
-write-output "MERGE INTO BRANCHES OF THE CURRENT REPOSITORY"
+write-output "ALIGN CURRENT REPOSITORY"
 split-path -path $pwd -leaf
 git fetch --all --quiet
 
@@ -104,10 +104,37 @@ if($consent.equals("y") -or $consent.equals("Y")){
 }
 
 
+#REMOTE REPOSITORIES
+write-output "ALIGN REMOTE REPOSITORIES"
+for($i=1;$i -lt $remoteRepos.Length; $i++){
+    set-location $remoteRepos[$i]
+    split-path -path $pwd -leaf
+    git fetch --all --quiet
 
+    $needAlign = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
+    if($needAlign.equals("y") -or $needAlign.equals("Y")){
+        $consent = read-host "Do you want to align the branch ""develop""? [y or Y if yes, any other if no]"
+        if($consent.equals("y") -or $consent.equals("Y")){
+            LocalMerge("develop","origin/develop")
+        }
+        write-output ""
 
+        $consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
+        if($consent.equals("y") -or $consent.equals("Y")){
+            LocalMerge("release/2","develop")
+        }
+        write-output ""
 
+        $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
+        if($consent.equals("y") -or $consent.equals("Y")){
+            $temporaryBranch = ""
+            TemporaryBranchCreation($temporaryBranch)
+            write-output "Temporary branch -> $temporaryBranch"
+            LocalMerge($temporaryBranch,"origin/main")
+        }
+    }
 
+}
 
 
 
