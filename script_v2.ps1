@@ -7,6 +7,7 @@ function LocalMerge {
         [string]$mergeInto,[string]$mergeFrom
     )
 
+    write-output "$mergeInto <- $mergeFrom"
     git switch $mergeInto
     git fetch --quiet
     git pull --quiet
@@ -137,7 +138,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
         if($consent.equals("y") -or $consent.equals("Y")){
             write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
             $temporaryBranch = ""
-            TemporaryBranchCreation $temporaryBranch
+            $temporaryBranch = TemporaryBranchCreation $temporaryBranch
             LocalMerge $temporaryBranch "remotes/$mainRepoName/main"
         }
     }
