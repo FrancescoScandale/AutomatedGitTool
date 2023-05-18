@@ -5,6 +5,7 @@ set-psdebug -trace 1 #used to show in the command line the executed commands
 function LocalMerge {
     param([string[]]$mergeInto,[string[]]$mergeFrom)
 
+    write-output "$mergeInto"
     git switch $mergeInto
     git fetch --quiet
     git pull --quiet
