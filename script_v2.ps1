@@ -88,22 +88,22 @@ git fetch --all --quiet
 
 $consent = read-host "Do you want to merge into branch ""develop""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
-    LocalMerge("develop",$modificationsBranch)
+    LocalMerge "develop" $modificationsBranch
 }
 write-output ""
 
 $consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
-    LocalMerge("release/2","develop")
+    LocalMerge "release/2" "develop"
 }
 write-output ""
 
 $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
     $temporaryBranch = ""
-    TemporaryBranchCreation($temporaryBranch)
+    TemporaryBranchCreation $temporaryBranch
     write-output "Temporary branch -> $temporaryBranch"
-    LocalMerge($temporaryBranch,$modificationsBranch)
+    LocalMerge $temporaryBranch $modificationsBranch
 }
 write-output ""
 write-output ""
@@ -120,22 +120,22 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
     if($needAlign.equals("y") -or $needAlign.equals("Y")){
         $consent = read-host "Do you want to align the branch ""develop""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
-            LocalMerge("develop","origin/develop")
+            LocalMerge "develop" "origin/develop"
         }
         write-output ""
 
         $consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
-            LocalMerge("release/2","develop")
+            LocalMerge "release/2" "develop"
         }
         write-output ""
 
         $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
             $temporaryBranch = ""
-            TemporaryBranchCreation($temporaryBranch)
+            TemporaryBranchCreation $temporaryBranch
             write-output "Temporary branch -> $temporaryBranch"
-            LocalMerge($temporaryBranch,"origin/main")
+            LocalMerge $temporaryBranch "origin/main"
         }
     }
     write-output ""
