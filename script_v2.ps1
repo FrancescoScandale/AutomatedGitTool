@@ -50,7 +50,7 @@ function TemporaryBranchCreation {
     git push -u origin $temporaryBranch --quiet
 }
 
-#getting the child repositories from config file (which contains the global paths)
+#getting the repositories from config file (which contains the global paths)
 $remoteRepos = @()
 foreach($line in get-content .\config){
     $remoteRepos = $remoteRepos + $line
