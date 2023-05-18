@@ -47,7 +47,7 @@ function TemporaryBranchCreation {
         }
     }
     
-    git switch main
+    git switch main --quiet
     git branch $temporaryBranch #create temporaryBranch
     git switch $temporaryBranch
     git push -u origin $temporaryBranch --quiet
