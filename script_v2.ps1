@@ -2,11 +2,60 @@
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
 
+function LocalMerge {
+    param([string[]]$mergeInto,[string[]]$mergeFrom)
+
+    git switch $mergeInto
+    git fetch --quiet
+    git pull --quiet
+
+    $err = git merge $mergeFrom
+    write-output "Summary of the merge, merging and pushing... "
+    if(!($err -like "*fatal*") -and !($err -like "*failed*")){
+        write-output "$err"
+        write-output ""
+        git push --quiet
+
+        write-output "... done"
+    } else {
+        write-output "ERROR - $err"
+        write-output "...an error occurred, check the terminal"
+    }
+}
+
+function TemporaryBranchCreation {
+    param([string[]]$temporaryBranch)
+
+    write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
+    $temporaryBranch = read-host "Insert the name for a temporary branch"
+    $branchNotExists = $false
+    while(!$branchNotExists){ #check if branch already exists
+        foreach($branchI in $allBranch){
+            if($branchI.equals("  $temporaryBranch") -or $branchI.equals("* $temporaryBranch") -or $branchI.equals("  remotes/origin/$temporaryBranch")){
+                $branchNotExists = $true
+                $temporaryBranch = read-host "A branch with the name $temporaryBranch alrady exists, provide a new temporary branch name"
+                break
+            }
+        }
+
+        if($branchNotExists -eq $true){ #if branch found, repeat the control
+            $branchNotExists = $false
+        } else {
+            $branchNotExists = $true
+        }
+    }
+    
+    git branch $temporaryBranch #create temporaryBranch
+    git switch $temporaryBranch
+    git push -u origin $temporaryBranch --quiet
+}
+
 #getting the child repositories from config file (which contains the global paths)
 $remoteRepos = @()
 foreach($line in get-content .\config){
     $remoteRepos = $remoteRepos + $line
 }
+set-location $remoteRepos[0]
 write-output "Current repository location: "
 split-path -path $pwd -leaf
 write-output ""
@@ -30,65 +79,43 @@ write-output ""
 write-output ""
 
 #ORIGIN REPOSITORY
-write-output "MERGE INTO THE EXISTING BRANCHES"
+write-output "MERGE INTO BRANCHES OF THE CURRENT REPOSITORY"
 split-path -path $pwd -leaf
 git fetch --all --quiet
 
-$keepMerging = read-host "Do you want to merge branches in this repo? [y or Y if yes, any other if no]" 
-while($keepMerging.equals("y") -or $keepMerging.equals("Y")){
-    $allBranch = git branch
-    write-output "List of branches:"
-    git branch -a
+$consent = read-host "Do you want to merge into branch ""develop""? [y or Y if yes, any other if no]"
+if($consent.equals("y") -or $consent.equals("Y")){
+    LocalMerge("develop",$modificationsBranch)
+}
+write-output ""
 
-    $flagBranchFound = 0
-    while(!$flagBranchFound){
-        $originalBranch = read-host "Which branch do you want to merge?"
-        
-        #for all available branches
-        foreach($branchI in $allBranch){
-            if($branchI.equals("  $originalBranch") -or $branchI.equals("* $originalBranch") -or $branchI.equals("  remotes/origin/$originalBranch")){
-                $flagBranchFound = 1
-                write-output "Valid branch: $originalBranch - flag: $flagBranchFound"
-                break
-            }
-        }
+$consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
+if($consent.equals("y") -or $consent.equals("Y")){
+    LocalMerge("release/2","develop")
+}
+write-output ""
 
-        if(!$flagBranchFound) {write-output "Branch not found, please insert a valid branch"}
-    }
-
-    write-output "Switching into the branch, fetching, merging and pushing..."
-    git switch $originalBranch
-    git fetch --quiet
-    git pull --quiet
-
-    if($originalBranch -like "*release*"){ #if in release, merge directly the local (aligned) develop
-        $err = git merge develop
-    } else {
-        $err = git merge $modificationsBranch
-    }
-    if(!($err -like "*fatal*") -and !($err -like "*failed*") -and !($originalBranch -like "*main*")){
-        git push --quiet
-
-        write-output "... done"
-    } elseif(!(!($err -like "*fatal*") -and !($err -like "*failed*"))){
-        write-output "ERROR - $err"
-        write-output "...an error occurred, check the terminal"
-    } else { #can't merge into main, just push the temporary branch
-        git push --quiet
-
-        write-output "...to merge back into main, need to create a pull request from GitHub"
-    }
-    write-output ""
-
-    $keepMerging = read-host "Do you want to merge another branch? [y or Y if yes, any other if no]"    
+$consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
+if($consent.equals("y") -or $consent.equals("Y")){
+    $temporaryBranch = ""
+    TemporaryBranchCreation($temporaryBranch)
+    write-output "Temporary branch -> $temporaryBranch"
+    LocalMerge($temporaryBranch,$modificationsBranch)
 }
 
-write-output ""
-write-output ""
+
+
+
+
+
+
+
+
+
 
 #REMOTE REPOSITORIES
 write-output "MERGE REMOTE REPOSITORIES"
-for($i=0;$i -lt $remoteRepos.Length; $i++){
+for($i=1;$i -lt $remoteRepos.Length; $i++){
 
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
