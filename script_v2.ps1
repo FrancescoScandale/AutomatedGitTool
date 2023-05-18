@@ -30,7 +30,6 @@ function TemporaryBranchCreation {
     param([string]$temporaryBranch)
 
     $allBranch = git branch -a
-    write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = read-host "Insert the name for a temporary branch"
     $branchNotExists = $false
     while(!$branchNotExists){ #check if branch already exists
@@ -103,6 +102,7 @@ write-output ""
 
 $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
+    write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = ""
     $temporaryBranch = TemporaryBranchCreation $temporaryBranch
     write-output "Temporary branch -> $temporaryBranch"
@@ -135,6 +135,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
 
         $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
+            write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
             $temporaryBranch = ""
             TemporaryBranchCreation $temporaryBranch
             write-output "Temporary branch -> $temporaryBranch"
