@@ -1,6 +1,7 @@
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
+#TODO: PERFORM ALL MERGES BEFORE DOING THE PUSH, SINCE PUSHING TRIGGERS THE BUILD IN JENKINS
 function LocalMerge {
     param(
         [string]$mergeInto,[string]$mergeFrom
@@ -76,7 +77,7 @@ $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-git push -u origin $modificationsBranch --quiet
+git push -u origin $modificationsBranch --quiet #TODO: POSSIBLY MOVE THIS PUSH AFTER THE COMMIT, SO THAT ONLY ONE HAS TO BE DONE
 git add .
 git commit -m $commitMessage --quiet
 git push --quiet
@@ -146,7 +147,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
     write-output ""
 }
 
-set-location ..\AutomatedGitTool
+set-location ..\AutomatedGitTool #TODO: USE $REMOTEREPOS TO MAKE THIS PARAMETRIC
 git switch $modificationsBranch
 
 $consent = read-host "If you want to delete the branch $modificationsBranch insert [y or Y if yes, any other if no]"
