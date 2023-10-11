@@ -94,26 +94,22 @@ git push -u origin $modificationsBranch --quiet
 write-output "... done"
 write-output ""
 write-output ""
-                                        
+
+#ask which branches need to be aligned
+$consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
+$consentMain = read-host "Do you want to merge into branch ""main""? [y/Y if yes, any other if no]"
+$consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
+
 #ORIGIN REPOSITORY
 write-output "ALIGN CURRENT REPOSITORY"
 split-path -path $pwd -leaf
 git fetch --all --prune --quiet
                                         
-$consent = read-host "Do you want to merge into branch ""develop""? [y or Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
     LocalMerge "develop" $modificationsBranch
 }
 write-output ""
                                         
-#TEMPLATE REPOSITORY DOES NOT HAVE PRE-PROD, MIGHT WANT TO DELETE THIS BRANCH
-$consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
-if ($consent.equals("y") -or $consent.equals("Y")) {
-    LocalMerge "release/2" "develop"
-}
-write-output ""
-                                        
-$consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
     write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = ""
