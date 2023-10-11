@@ -1,7 +1,9 @@
+#THIS SCRIPT ALLOWS TO MERGE THE CURRENT BRANCH INTO THE IMPORTANT BRANCHES
+
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
                                         #already set in my system
-function LocalMerge {
+function MergeBranches {
     param(
         [string]$mergeInto,[string]$mergeFrom
     )
@@ -91,14 +93,14 @@ git fetch --all --prune --quiet
 
 $consent = read-host "Do you want to merge into branch ""develop""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
-    LocalMerge "develop" $modificationsBranch
+    MergeBranches "develop" $modificationsBranch
 }
 write-output ""
 
 #TEMPLATE REPOSITORY DOES NOT HAVE PRE-PROD, MIGHT WANT TO DELETE THIS BRANCH
 $consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
 if($consent.equals("y") -or $consent.equals("Y")){
-    LocalMerge "release/2" "develop"
+    MergeBranches "release/2" "develop"
 }
 write-output ""
 
@@ -107,7 +109,7 @@ if($consent.equals("y") -or $consent.equals("Y")){
     write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = ""
     $temporaryBranch = TemporaryBranchCreation $temporaryBranch
-    LocalMerge $temporaryBranch $modificationsBranch
+    MergeBranches $temporaryBranch $modificationsBranch
 }
 write-output ""
 write-output ""
@@ -124,13 +126,13 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
     if($needAlign.equals("y") -or $needAlign.equals("Y")){
         $consent = read-host "Do you want to align the branch ""develop""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
-            LocalMerge "develop" "$mainRepoName/develop"
+            MergeBranches "develop" "$mainRepoName/develop"
         }
         write-output ""
 
         $consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
         if($consent.equals("y") -or $consent.equals("Y")){
-            LocalMerge "release/2" "develop"
+            MergeBranches "release/2" "develop"
         }
         write-output ""
 
@@ -139,7 +141,7 @@ for($i=1;$i -lt $remoteRepos.Length; $i++){
             write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
             $temporaryBranch = ""
             $temporaryBranch = TemporaryBranchCreation $temporaryBranch
-            LocalMerge $temporaryBranch "$mainRepoName/main"
+            MergeBranches $temporaryBranch "$mainRepoName/main"
         }
     }
     write-output ""
