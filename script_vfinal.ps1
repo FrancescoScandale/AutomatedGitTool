@@ -1,11 +1,13 @@
-#FINAL VERSION OF THHE SCRIPT: MERGE CURRENT BRANCH INTO THE IMPORTANT ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
+#FINAL VERSION OF THE SCRIPT
+#START FROM AN UN-COMMITTED BRANCH (POSSIBLY ALSO FROM A COMMITTED ONE)
+#INSERT COMMIT MESSAGE, ADD, COMMIT, PUSH NEW BRANCH
+#ASK INTO WHICH BRANCHES WE HAVE TO MERGE THE CURRENT ONE
+#MERGE CURRENT BRANCH INTO THE CHOSEN ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
 
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
 
-#TODO: MAKE AN INPUT WHERE THE USERE CHOOSES WHICH BRANCHES HE WANTS TO MERGE: MAIN, DEVELOP, RELEASE
-    #IF INSERTS A BRANCH NOT OF THOSE, INSERT AGAIN
-    #THIS WAY NO CONFIRMS ARE NECESSARY, JUST MERGE AND ALSO MERGE IN THE CHILD REPOS
+#TODO: MAKE AN INPUT WHERE THE USER SAYS Y/N TO WHICH BRANCHES HE WANTS TO MERGE (ALSO MERGE IN THE CHILD REPOS)
 #TODO: CHECK IF THERE IS A WAY TO REDIRECT GIT OUTPUT TO STDOUT INSTEAD OF STDERR
     #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
 function LocalMerge {
@@ -15,7 +17,6 @@ function LocalMerge {
                                         
     write-output "$mergeInto <- $mergeFrom"
     git switch $mergeInto
-    git fetch --quiet
     git pull --quiet
                                         
     $err = git merge $mergeFrom
@@ -87,11 +88,9 @@ $modificationsBranch = git branch --show-current #retrieve current branch
 write-output "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
 write-output "Git does add, commit and push..."
-git push -u origin $modificationsBranch --quiet #TODO: PLACE THIS PUSH AFTER THE COMMIT, SO THAT ONLY ONE PUSH IS DONE
-                                                    #CHECK FOR OTHER LITTLE IMPROVEMENTS
 git add .
 git commit -m $commitMessage --quiet
-git push --quiet
+git push -u origin $modificationsBranch --quiet
 write-output "... done"
 write-output ""
 write-output ""
@@ -158,7 +157,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     write-output ""
 }
                                         
-set-location ..\AutomatedGitTool #TODO: MAKE THIS PARAMETRIC BY USING THE LEAF OF THE 1ST PATH
+set-location $remoteRepos[0]
 git switch $modificationsBranch
                                         
 $consent = read-host "If you want to delete the branch $modificationsBranch insert [y or Y if yes, any other if no]"
