@@ -1,4 +1,4 @@
 $myVariable = git pull
 
-echo ""
+echo "CIAO"
 echo "$myVariable"
