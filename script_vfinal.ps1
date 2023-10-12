@@ -80,16 +80,12 @@ function TemporaryMainBranchCreation {
 function TmpBranchCreation {
     param()
 
-    $tmpBranch = $temporaryMainBranch #use the same name as for the temporary branch in the template repository
-
     git switch main
     git pull --quiet
-
-    git branch $tmpBranch
-    git push origin -u $tmpBranch
-
-    write-output "FROM INSIDE: $tmpBranch - $temporaryMainBranch"
-    return $tmpBranch
+    
+    #use the same name as for the temporary branch in the template repository
+    git branch $temporaryMainBranch
+    git push origin -u $temporaryMainBranch
 }
                                         
 #getting the repositories from config file (which contains global paths)
@@ -176,10 +172,8 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         write-output ""
                                         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-            # $tmpBranch = ""
-            $tmpBranch = TmpBranchCreation
-            write-output "DOES THIS WORK? tmpBranch -> $tmpBranch"
-            LocalMerge $tmpBranch "${mainRepoName}/${temporaryMainBranch}"
+            TmpBranchCreation
+            LocalMerge $temporaryMainBranch "${mainRepoName}/${temporaryMainBranch}"
         }
     }
     write-output ""
