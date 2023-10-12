@@ -6,13 +6,13 @@
 #ASK THE NAME OF THE TEMPORARY BRANCH IN CASE MAIN HAS TO BE MERGED
 #MERGE CURRENT BRANCH INTO THE CHOSEN ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
 
-#set-psdebug -trace 0 #used to show in the command line the executed commands
-#git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
-
 #TODO: CHECK IF THERE IS A WAY TO REDIRECT GIT OUTPUT TO STDOUT INSTEAD OF STDERR
     #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
 #TODO: SIGNAL THAT THERE IS THE NEED TO HAVE THE TEMPLATE REPO AS REMOTE IN THE CHILDREN REPOS
 #TODO: ASK TEMPORARY BRANCH NAME IN CASE MAIN HAS TO BE MERGED
+
+#set-psdebug -trace 0 #used to show in the command line the executed commands
+#git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
 
 function LocalMerge {
     param(
