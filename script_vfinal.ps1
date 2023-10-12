@@ -7,10 +7,8 @@
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
 
-#TODO: AUTOMATICALLY MERGE IN THE CHILD REPOS
 #TODO: CHECK IF THERE IS A WAY TO REDIRECT GIT OUTPUT TO STDOUT INSTEAD OF STDERR
     #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
-#TODO: TEST WHAT HAPPENS IF BRANCH ALREADY COMMITTED AND/OR ALREADY PUSHED
 #TODO: SIGNAL THAT THERE IS THE NEED TO HAVE THE TEMPLATE REPO AS REMOTE IN THE CHILDREN REPOS
 
 function LocalMerge {
@@ -116,8 +114,9 @@ for ($i = 0; $i -lt $remoteRepos.Length; $i++){
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
 }
-write-output "TODO: DELETE THESE PRINTS"
-write-output "Consents: $consentMain $consentDevelop $consentRelease ${needAlign}"
+write-output ""
+write-output ""
+write-output ""
 
 #ORIGIN REPOSITORY
 write-output "ALIGN CURRENT REPOSITORY"
@@ -153,7 +152,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         write-output ""
                                         
         if ($consentRelease.equals("y") -or $consentRelease.equals("Y")) {
-            LocalMerge "release/2" "develop"
+            LocalMerge "release" "develop"
         }
         write-output ""
                                         
@@ -164,6 +163,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
             LocalMerge $temporaryBranch "$mainRepoName/main"
         }
     }
+    write-output ""
     write-output ""
     write-output ""
 }
@@ -182,4 +182,3 @@ if ($consent.equals("y") -or $consent.equals("Y")) {
         git push origin -d $modificationsBranch --quiet
     }
 }
-                                        
