@@ -1,5 +1,5 @@
 #FINAL VERSION OF THE SCRIPT
-#START FROM AN UN-COMMITTED BRANCH (POSSIBLY ALSO FROM A COMMITTED ONE)
+#START FROM AN UN-COMMITTED AND UN-PUSHED BRANCH
 #INSERT COMMIT MESSAGE, ADD, COMMIT, PUSH NEW BRANCH
 #ASK INTO WHICH BRANCHES WE HAVE TO MERGE THE CURRENT ONE
 #MERGE CURRENT BRANCH INTO THE CHOSEN ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
@@ -7,29 +7,38 @@
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
 
-#TODO: MAKE AN INPUT WHERE THE USER SAYS Y/N TO WHICH BRANCHES HE WANTS TO MERGE (ALSO MERGE IN THE CHILD REPOS)
+#TODO: AUTOMATICALLY MERGE IN THE CHILD REPOS
 #TODO: CHECK IF THERE IS A WAY TO REDIRECT GIT OUTPUT TO STDOUT INSTEAD OF STDERR
     #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
+#TODO: TEST WHAT HAPPENS IF BRANCH ALREADY COMMITTED AND/OR ALREADY PUSHED
+
 function LocalMerge {
     param(
         [string]$mergeInto, [string]$mergeFrom
     )
-                                        
+    $mergeError = $false
+
     write-output "$mergeInto <- $mergeFrom"
     git switch $mergeInto
     git pull --quiet
+    
+    while (!$mergeError) {
+        $err = git merge $mergeFrom
+        write-output "Summary of the merge, merging and pushing... "
+        if (!($err -like "*fatal*") -and !($err -like "*failed*")) {
+            write-output "$err"
+            git push --quiet
                                         
-    $err = git merge $mergeFrom
-    write-output "Summary of the merge, merging and pushing... "
-    if (!($err -like "*fatal*") -and !($err -like "*failed*")) {
-        write-output "$err"
-        git push --quiet
-                                        
-        write-output "... done"
-    }
-    else {
-        write-output "ERROR - $err"
-        write-output "...an error occurred, check the terminal"
+            write-output "... done"
+            $mergeError = $true
+        }
+        else {
+            write-output "ERROR - $err"
+            write-output "...an error occurred, check the terminal"
+            read-host "Solve the conflict and hit enter when ready"
+            git add .
+            git commit
+        }
     }
 }
                                         
@@ -60,7 +69,7 @@ function TemporaryBranchCreation {
                                             
     git switch main --quiet
     git branch $temporaryBranch #create temporaryBranch
-    git switch $temporaryBranch
+    git switch $temporaryBranch --quiet
     git push -u origin $temporaryBranch --quiet
                                         
     return $temporaryBranch
@@ -99,18 +108,26 @@ write-output ""
 $consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
 $consentMain = read-host "Do you want to merge into branch ""main""? [y/Y if yes, any other if no]"
 $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
+#ask which repos need to be aligned
+$needAlign = @()
+for ($i = 0; $i -lt $remoteRepos.Length; $i++){
+    $consent = read-host "Do you want to align repo $remoteRepos[$i]? [y/Y to proceed, any other key to skip]"
+    $needAlign = $needAlign + $consent
+}
+write-output "TODO: DELETE THESE PRINTS"
+write-output "$remoteRepos[0] $remoteRepos[1] $remoteRepos[2]"
 
 #ORIGIN REPOSITORY
 write-output "ALIGN CURRENT REPOSITORY"
 split-path -path $pwd -leaf
 git fetch --all --prune --quiet
                                         
-if ($consent.equals("y") -or $consent.equals("Y")) {
+if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
     LocalMerge "develop" $modificationsBranch
 }
 write-output ""
                                         
-if ($consent.equals("y") -or $consent.equals("Y")) {
+if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
     write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryBranch = ""
     $temporaryBranch = TemporaryBranchCreation $temporaryBranch
@@ -125,24 +142,20 @@ write-output "ALIGN REMOTE REPOSITORIES"
 for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
-    git fetch --all --prune --quiet
-                                        
-    $needAlign = read-host "Do you want to align this repo? [y or Y to proceed, any other key to skip]"
-    if ($needAlign.equals("y") -or $needAlign.equals("Y")) {
-        $consent = read-host "Do you want to align the branch ""develop""? [y or Y if yes, any other if no]"
-        if ($consent.equals("y") -or $consent.equals("Y")) {
+    
+    if ($needAlign[$i].equals("y") -or $needAlign[$i].equals("Y")) {
+        git fetch --all --prune --quiet
+        if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
             LocalMerge "develop" "$mainRepoName/develop"
         }
         write-output ""
                                         
-        $consent = read-host "Do you want to merge into branch ""release/2""? [y or Y if yes, any other if no]"
-        if ($consent.equals("y") -or $consent.equals("Y")) {
+        if ($consentRelease.equals("y") -or $consentRelease.equals("Y")) {
             LocalMerge "release/2" "develop"
         }
         write-output ""
                                         
-        $consent = read-host "Do you want to merge into branch ""main""? [y or Y if yes, any other if no]"
-        if ($consent.equals("y") -or $consent.equals("Y")) {
+        if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
             write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
             $temporaryBranch = ""
             $temporaryBranch = TemporaryBranchCreation $temporaryBranch
@@ -156,7 +169,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
 set-location $remoteRepos[0]
 git switch $modificationsBranch
                                         
-$consent = read-host "If you want to delete the branch $modificationsBranch insert [y or Y if yes, any other if no]"
+$consent = read-host "Delete branch $modificationsBranch? [y/Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
     if ($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or ($modificationsBranch -like "*release*")) {
         write-output "Can't delete this branch!"
