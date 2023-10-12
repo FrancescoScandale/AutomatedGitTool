@@ -165,7 +165,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     if ($needAlign[$i].equals("y") -or $needAlign[$i].equals("Y")) {
         git fetch --all --prune --quiet
         if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
-            LocalMerge "develop" "$mainRepoName/develop"
+            LocalMerge "develop" "${mainRepoName}/develop"
         }
         write-output ""
                                         
@@ -176,7 +176,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
                                         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
             $tmpBranch = TmpBranchCreation
-            LocalMerge $tmpBranch "$mainRepoName/$temporaryMainBranch"
+            LocalMerge $tmpBranch "${mainRepoName}/${temporaryMainBranch}"
         }
     }
     write-output ""
@@ -187,7 +187,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
 set-location $remoteRepos[0]
 git switch $modificationsBranch
                                         
-$consent = read-host "Delete branch $modificationsBranch? [y/Y if yes, any other if no]"
+$consent = read-host "Delete branch ${modificationsBranch}? [y/Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
     if ($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or ($modificationsBranch -like "*release*")) {
         write-output "Can't delete this branch!"
