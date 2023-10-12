@@ -9,7 +9,6 @@
 #TODO: CHECK IF THERE IS A WAY TO REDIRECT GIT OUTPUT TO STDOUT INSTEAD OF STDERR
     #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
 #TODO: SIGNAL THAT THERE IS THE NEED TO HAVE THE TEMPLATE REPO AS REMOTE IN THE CHILDREN REPOS
-#TODO: ASK TEMPORARY BRANCH NAME IN CASE MAIN HAS TO BE MERGED
 
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
@@ -24,27 +23,28 @@ function LocalMerge {
     git switch $mergeInto
     git pull --quiet
     
+    $err = git merge $mergeFrom
+    write-output "Summary of the merge, merging and pushing... "
+    write-output "$err"
     while (!$mergeError) {
-        $err = git merge $mergeFrom
-        write-output "Summary of the merge, merging and pushing... "
         if (!($err -like "*fatal*") -and !($err -like "*failed*")) {
-            write-output "$err"
             git push --quiet
                                         
             write-output "... done"
             $mergeError = $true
         }
         else {
-            write-output "ERROR - $err"
-            write-output "...an error occurred, check the terminal"
-            read-host "Solve the conflict and hit enter when ready"
+            write-output "AN ERROR OCCURRED!"
+            write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, to have an easy graphical interface."
+            write-output "Just solve the conflict and save the file, this script will take care of the rest."
+            read-host "Hit enter when ready"
             git add .
             git commit
         }
     }
 }
                                         
-function TemporaryBranchCreation {
+function TemporaryMainBranchCreation {
     param()
                                         
     $allBranch = git branch -a
@@ -75,6 +75,20 @@ function TemporaryBranchCreation {
     git push -u origin $temporaryBranch --quiet
                                         
     return $temporaryBranch
+}
+
+function TmpBranchCreation {
+    param()
+
+    $tmpBranch = $temporaryMainBranch #use the same name as for the temporary branch in the template repository
+
+    git switch main
+    git pull --quiet
+
+    git branch $tmpBranch
+    git push origin -u $tmpBranch
+
+    return $tmpBranch
 }
                                         
 #getting the repositories from config file (which contains global paths)
@@ -108,14 +122,12 @@ write-output ""
 
 #ask which branches need to be aligned
 $consentMain = read-host "Do you want to merge into branch ""main""? [y/Y if yes, any other if no]"
-$consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
-$consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
     write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
-    # $temporaryMainBranch = ""
-    $temporaryMainBranch = TemporaryBranchCreation
-    write-output "$temporaryMainBranch"
+    $temporaryMainBranch = TemporaryMainBranchCreation
 }
+$consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
+$consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
 #ask which repos need to be aligned
 $needAlign = @()
 for ($i = 0; $i -lt $remoteRepos.Length; $i++){
@@ -163,7 +175,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         write-output ""
                                         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-            $tmpBranch = TemporaryBranchCreation
+            $tmpBranch = TmpBranchCreation
             LocalMerge $tmpBranch "$mainRepoName/$temporaryMainBranch"
         }
     }
@@ -181,7 +193,7 @@ if ($consent.equals("y") -or $consent.equals("Y")) {
         write-output "Can't delete this branch!"
     }
     else {
-        git switch develop
+        git switch main
         git branch -D $modificationsBranch #force the delete
         git push origin -d $modificationsBranch --quiet
     }
