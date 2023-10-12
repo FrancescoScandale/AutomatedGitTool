@@ -111,7 +111,7 @@ $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y 
 #ask which repos need to be aligned
 $needAlign = @()
 for ($i = 0; $i -lt $remoteRepos.Length; $i++){
-    $currentRepo = ($remoteRepos[$i] -split '\')[-1]
+    $currentRepo = ($remoteRepos[$i] -split '\\')[-1]
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
 }
