@@ -150,8 +150,6 @@ if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
 write-output ""
                                         
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-    write-output "temporaryMainBranch -> $temporaryMainBranch"
-    write-output "modificationsBranch -> $modificationsBranch"
     LocalMerge $temporaryMainBranch $modificationsBranch
 }
 write-output ""
