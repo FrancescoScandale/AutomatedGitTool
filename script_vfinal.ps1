@@ -10,7 +10,7 @@
     #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
 #TODO: SIGNAL THAT THERE IS THE NEED TO HAVE THE TEMPLATE REPO AS REMOTE IN THE CHILDREN REPOS
 
-set-psdebug -trace 1 #used to show in the command line the executed commands
+set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
 
 function LocalMerge {
@@ -88,6 +88,7 @@ function TmpBranchCreation {
     git branch $tmpBranch
     git push origin -u $tmpBranch
 
+    write-output "FROM INSIDE: $tmpBranch - $temporaryMainBranch"
     return $tmpBranch
 }
                                         
@@ -175,8 +176,9 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         write-output ""
                                         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-            $tmpBranch = ""
+            # $tmpBranch = ""
             $tmpBranch = TmpBranchCreation
+            write-output "DOES THIS WORK? tmpBranch -> $tmpBranch"
             LocalMerge $tmpBranch "${mainRepoName}/${temporaryMainBranch}"
         }
     }
