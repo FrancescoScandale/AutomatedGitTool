@@ -35,7 +35,7 @@ function LocalMerge {
         }
         else {
             write-output "AN ERROR OCCURRED!"
-            write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, to have an easy graphical interface."
+            write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, which has an easy graphical interface."
             write-output "Just solve the conflict and save the file, this script will take care of the rest."
             read-host "Hit enter when ready"
             git add .
@@ -150,6 +150,8 @@ if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
 write-output ""
                                         
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
+    write-output "temporaryMainBranch -> $temporaryMainBranch"
+    write-output "modificationsBranch -> $modificationsBranch"
     LocalMerge $temporaryMainBranch $modificationsBranch
 }
 write-output ""
