@@ -105,22 +105,18 @@ write-output ""
 write-output ""
 
 #ask which branches need to be aligned
-$consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
 $consentMain = read-host "Do you want to merge into branch ""main""? [y/Y if yes, any other if no]"
+$consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
 $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
 #ask which repos need to be aligned
 $needAlign = @()
 for ($i = 0; $i -lt $remoteRepos.Length; $i++){
-    $length = $remoteRepos[$i].split["\"].Length
-    write-output "LENGTH: $length"
-    #$currentRepo = $remoteRepos[$i].split["\"][$length-1]
-    $test = $remoteRepos[$i].split["\"]
-    write-output "Repo name: $test"
+    $currentRepo = ($remoteRepos[$i] -split '\')[-1]
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
 }
 write-output "TODO: DELETE THESE PRINTS"
-write-output "${needAlign}"
+write-output "Consents: $consentMain $consentDevelop $consentRelease ${needAlign}"
 
 #ORIGIN REPOSITORY
 write-output "ALIGN CURRENT REPOSITORY"
