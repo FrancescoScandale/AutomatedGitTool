@@ -175,6 +175,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         write-output ""
                                         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
+            $tmpBranch = ""
             $tmpBranch = TmpBranchCreation
             LocalMerge $tmpBranch "${mainRepoName}/${temporaryMainBranch}"
         }
