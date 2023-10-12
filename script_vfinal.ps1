@@ -45,7 +45,7 @@ function LocalMerge {
 }
                                         
 function TemporaryBranchCreation {
-    param([string]$temporaryBranch)
+    param()
                                         
     $allBranch = git branch -a
     $temporaryBranch = read-host "Insert the name for a temporary branch"
@@ -110,6 +110,12 @@ write-output ""
 $consentMain = read-host "Do you want to merge into branch ""main""? [y/Y if yes, any other if no]"
 $consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
 $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
+if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
+    write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
+    # $temporaryMainBranch = ""
+    $temporaryMainBranch = TemporaryBranchCreation
+    write-output "$temporaryMainBranch"
+}
 #ask which repos need to be aligned
 $needAlign = @()
 for ($i = 0; $i -lt $remoteRepos.Length; $i++){
@@ -132,10 +138,7 @@ if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
 write-output ""
                                         
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-    write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
-    $temporaryBranch = ""
-    $temporaryBranch = TemporaryBranchCreation $temporaryBranch
-    LocalMerge $temporaryBranch $modificationsBranch
+    LocalMerge $temporaryMainBranch $modificationsBranch
 }
 write-output ""
 write-output ""
@@ -160,10 +163,8 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         write-output ""
                                         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-            write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
-            $temporaryBranch = ""
-            $temporaryBranch = TemporaryBranchCreation $temporaryBranch
-            LocalMerge $temporaryBranch "$mainRepoName/main"
+            $tmpBranch = TemporaryBranchCreation
+            LocalMerge $tmpBranch "$mainRepoName/$temporaryMainBranch"
         }
     }
     write-output ""
