@@ -26,3 +26,5 @@ git push --quiet
 
 git branch -D tempMain
 git push origin -d tempMain
+
+set-location ..\AutomatedGitTool
