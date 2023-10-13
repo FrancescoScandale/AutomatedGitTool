@@ -127,7 +127,7 @@ $consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y 
 $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
 #ask which repos need to be aligned
 $needAlign = @()
-for ($i = 0; $i -lt $remoteRepos.Length; $i++){
+for ($i = 1; $i -lt $remoteRepos.Length; $i++){
     $currentRepo = ($remoteRepos[$i] -split '\\')[-1]
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
@@ -159,7 +159,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
     
-    if ($needAlign[$i].equals("y") -or $needAlign[$i].equals("Y")) {
+    if ($needAlign[$i-1].equals("y") -or $needAlign[$i-1].equals("Y")) {
         git fetch --all --prune --quiet
         if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
             LocalMerge "develop" "${mainRepoName}/develop"
