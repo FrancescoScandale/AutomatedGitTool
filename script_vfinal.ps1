@@ -43,6 +43,7 @@ function LocalMerge {
 function TemporaryMainBranchCreation {
     param()
     
+    git fetch --all --prune --quiet
     $allBranch = git branch -a
     $temporaryBranch = read-host "Insert the name for a temporary branch"
     $branchNotExists = $false
@@ -50,8 +51,19 @@ function TemporaryMainBranchCreation {
         #check if branch already exists
         foreach ($branchI in $allBranch) {
             if ($branchI.equals("  $temporaryBranch") -or $branchI.equals("* $temporaryBranch") -or $branchI.equals("  remotes/origin/$temporaryBranch")) {
-                $branchNotExists = $true
-                $temporaryBranch = read-host "A branch with the name $temporaryBranch alrady exists, provide a new temporary branch name"
+                write-output "A branch with the name $temporaryBranch alrady exists"
+
+                $consentBranch = read-host "Do you want to use it anyway? [y/Y if yes, any other if no]"
+                if ($consentBranch.equals("y") -or $consentBranch.equals("Y")){
+                    #branch already exists, just need to pull it to get all changes
+                    git switch $temporaryBranch --quiet
+                    git pull --quiet
+                    return $temporaryBranch
+                } else {
+                    #branch already exists but it's not to be used
+                    $branchNotExists = $true
+                    $temporaryBranch = read-host "Insert another name for a temporary branch"
+                }
                 break
             }
         }
@@ -66,8 +78,8 @@ function TemporaryMainBranchCreation {
     }
     
     git switch main --quiet
+    git pull --quiet
     git branch $temporaryBranch #create temporaryBranch
-    git switch $temporaryBranch --quiet
     git push -u origin $temporaryBranch --quiet
     
     return $temporaryBranch
@@ -76,12 +88,23 @@ function TemporaryMainBranchCreation {
 function TmpBranchCreation {
     param()
 
-    git switch main
-    git pull --quiet
-    
     #use the same name as for the temporary branch in the template repository
+
+    $allBranch = git branch -a
+    foreach ($branchI in $allBranch) {
+        if ($branchI.equals("  $temporaryMainBranch") -or $branchI.equals("* $temporaryMainBranch") -or $branchI.equals("  remotes/origin/$temporaryMainBranch")) {
+            #if branch already exists, just need to pull it to get all changes
+            git switch $temporaryMainBranch --quiet
+            git pull --quiet
+            return
+        }
+    }
+
+    #if branch does not exist
+    git switch main --quiet
+    git pull --quiet
     git branch $temporaryMainBranch
-    git push origin -u $temporaryMainBranch
+    git push origin -u $temporaryMainBranch --quiet
 }
 
 #getting the repositories from config file (which contains global paths)
@@ -178,7 +201,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
 }
 
 set-location $remoteRepos[0]
-git switch $modificationsBranch
+git switch main
 
 $consent = read-host "Delete branch ${modificationsBranch}? [y/Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
@@ -186,8 +209,7 @@ if ($consent.equals("y") -or $consent.equals("Y")) {
         write-output "Can't delete this branch!"
     }
     else {
-        git switch main
-        git branch -D $modificationsBranch #force the delete
-        git push origin -d $modificationsBranch --quiet
+        git branch -D $modificationsBranch
+        git push origin -d $modificationsBranch
     }
 }
