@@ -1,16 +1,12 @@
-#FINAL VERSION OF THE SCRIPT
-#START FROM AN UN-COMMITTED AND UN-PUSHED BRANCH
-#INSERT COMMIT MESSAGE, ADD, COMMIT, PUSH NEW BRANCH
-#ASK INTO WHICH BRANCHES WE HAVE TO MERGE THE CURRENT ONE
-#ASK WHICH REPOSITORIES HAVE TO BE ALIGNED
-#ASK THE NAME OF THE TEMPORARY BRANCH IN CASE MAIN HAS TO BE MERGED
-#MERGE CURRENT BRANCH INTO THE CHOSEN ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
+#FINAL VERSION OF THE SCRIPT. BEHAVIOUR:
+    #START FROM AN UN-COMMITTED AND UN-PUSHED BRANCH
+    #INSERT COMMIT MESSAGE, ADD, COMMIT, PUSH NEW BRANCH
+    #ASK INTO WHICH BRANCHES WE HAVE TO MERGE THE CURRENT ONE
+    #ASK THE NAME OF THE TEMPORARY BRANCH IN CASE MAIN HAS TO BE MERGED
+    #ASK WHICH REPOSITORIES HAVE TO BE ALIGNED
+    #MERGE CURRENT BRANCH INTO THE CHOSEN ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
 
-#TODO: CHECK IF THERE IS A WAY TO REDIRECT GIT OUTPUT TO STDOUT INSTEAD OF STDERR
-    #WOULD ALLOW TO SAVE IT INTO VARIABLES AND DISPLAY ONLY THE WANTED TEXT
-#TODO: SIGNAL THAT THERE IS THE NEED TO HAVE THE TEMPLATE REPO AS REMOTE IN THE CHILDREN REPOS
-
-set-psdebug -trace 0 #used to show in the command line the executed commands
+#set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
 
 function LocalMerge {
@@ -23,13 +19,13 @@ function LocalMerge {
     git switch $mergeInto
     git pull --quiet
     
-    $err = git merge $mergeFrom
+    $err = git merge $mergeFrom --no-edit
     write-output "Summary of the merge, merging and pushing... "
     write-output "$err"
     while (!$mergeError) {
         if (!($err -like "*fatal*") -and !($err -like "*failed*")) {
             git push --quiet
-                                        
+            
             write-output "... done"
             $mergeError = $true
         }
@@ -43,10 +39,10 @@ function LocalMerge {
         }
     }
 }
-                                        
+
 function TemporaryMainBranchCreation {
     param()
-                                        
+    
     $allBranch = git branch -a
     $temporaryBranch = read-host "Insert the name for a temporary branch"
     $branchNotExists = $false
@@ -59,7 +55,7 @@ function TemporaryMainBranchCreation {
                 break
             }
         }
-                                        
+        
         if ($branchNotExists -eq $true) {
             #if branch found, repeat the control
             $branchNotExists = $false
@@ -68,12 +64,12 @@ function TemporaryMainBranchCreation {
             $branchNotExists = $true
         }
     }
-                                            
+    
     git switch main --quiet
     git branch $temporaryBranch #create temporaryBranch
     git switch $temporaryBranch --quiet
     git push -u origin $temporaryBranch --quiet
-                                        
+    
     return $temporaryBranch
 }
 
@@ -87,7 +83,7 @@ function TmpBranchCreation {
     git branch $temporaryMainBranch
     git push origin -u $temporaryMainBranch
 }
-                                        
+
 #getting the repositories from config file (which contains global paths)
 $remoteRepos = @()
 foreach ($line in get-content .\config) {
@@ -101,9 +97,9 @@ write-output "Remote repositories location: "
 write-output $remoteRepos
 write-output ""
 write-output ""
-                                        
+
 $mainRepoName = split-path -path $pwd -leaf
-                                        
+
 #commit current changes
 write-output "COMMIT CURRENT CHANGES"
 $modificationsBranch = git branch --show-current #retrieve current branch
@@ -140,19 +136,19 @@ write-output ""
 write-output "ALIGN CURRENT REPOSITORY"
 split-path -path $pwd -leaf
 git fetch --all --prune --quiet
-                                        
+
 if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
     LocalMerge "develop" $modificationsBranch
 }
 write-output ""
-                                        
+
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
     LocalMerge $temporaryMainBranch $modificationsBranch
 }
 write-output ""
 write-output ""
 write-output ""
-                                        
+
 #REMOTE REPOSITORIES
 write-output "ALIGN REMOTE REPOSITORIES"
 for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
@@ -165,12 +161,12 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
             LocalMerge "develop" "${mainRepoName}/develop"
         }
         write-output ""
-                                        
+        
         if ($consentRelease.equals("y") -or $consentRelease.equals("Y")) {
             LocalMerge "release" "develop"
         }
         write-output ""
-                                        
+        
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
             TmpBranchCreation
             LocalMerge $temporaryMainBranch "${mainRepoName}/${temporaryMainBranch}"
@@ -180,10 +176,10 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     write-output ""
     write-output ""
 }
-                                        
+
 set-location $remoteRepos[0]
 git switch $modificationsBranch
-                                        
+
 $consent = read-host "Delete branch ${modificationsBranch}? [y/Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
     if ($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or ($modificationsBranch -like "*release*")) {
