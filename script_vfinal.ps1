@@ -7,7 +7,7 @@
     #MERGE CURRENT BRANCH INTO THE CHOSEN ONES (AUTOMATICALLY CASCADING THE MERGE IN THE CHILD REPOSITORIES)
 
 #set-psdebug -trace 0 #used to show in the command line the executed commands
-#git config --global pager.branch false #paging could affect the behavior of the script (already set in my system)
+#git config --global pager.branch false #paging could affect the behavior of the script
 
 function LocalMerge {
     param(
