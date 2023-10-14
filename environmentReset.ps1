@@ -1,3 +1,6 @@
+#!pwsh
+#make sure it's executed in powershell
+
 git switch main
 git merge tempMain
 git push
