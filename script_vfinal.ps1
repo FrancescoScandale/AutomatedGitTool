@@ -17,7 +17,6 @@ function LocalMerge {
     param(
         [string]$mergeInto, [string]$mergeFrom
     )
-    $mergeError = $false
 
     write-output "$mergeInto <- $mergeFrom"
     git switch $mergeInto
@@ -26,22 +25,18 @@ function LocalMerge {
     $err = git merge $mergeFrom --no-edit
     write-output "Summary of the merge, merging and pushing... "
     write-output "$err"
-    while (!$mergeError) {
-        if (!($err -like "*fatal*") -and !($err -like "*failed*")) {
-            git push --quiet
-            
-            write-output "... done"
-            $mergeError = $true
-        }
-        else {
-            write-output "AN ERROR OCCURRED!"
-            write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, which has an easy graphical interface."
-            write-output "Just solve the conflict and save the file, this script will take care of the rest."
-            read-host "Hit enter when ready"
-            git add .
-            git commit
-        }
+    if (($err -like "*fatal*") -or ($err -like "*failed*")) {
+        write-output "AN ERROR OCCURRED!"
+        write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, which has an easy graphical interface."
+        write-output "Just solve the conflict and save the file, this script will take care of the rest."
+        read-host "Hit enter when ready"
+        git add .
+        git commit
     }
+
+    git push --quiet
+            
+    write-output "... done"
 }
 
 function TemporaryMainBranchCreation {
@@ -58,12 +53,13 @@ function TemporaryMainBranchCreation {
                 write-output "A branch with the name $temporaryBranch alrady exists"
 
                 $consentBranch = read-host "Do you want to use it anyway? [y/Y if yes, any other if no]"
-                if ($consentBranch.equals("y") -or $consentBranch.equals("Y")){
+                if ($consentBranch.equals("y") -or $consentBranch.equals("Y")) {
                     #branch already exists, just need to pull it to get all changes
                     git switch $temporaryBranch --quiet
                     git pull --quiet
                     return $temporaryBranch
-                } else {
+                }
+                else {
                     #branch already exists but it's not to be used
                     $branchNotExists = $true
                     $temporaryBranch = read-host "Insert another name for a temporary branch"
@@ -150,7 +146,7 @@ $consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y 
 $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
 #ask which repos need to be aligned
 $needAlign = @()
-for ($i = 1; $i -lt $remoteRepos.Length; $i++){
+for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     $currentRepo = ($remoteRepos[$i] -split '\\')[-1]
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
@@ -182,7 +178,7 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
     
-    if ($needAlign[$i-1].equals("y") -or $needAlign[$i-1].equals("Y")) {
+    if ($needAlign[$i - 1].equals("y") -or $needAlign[$i - 1].equals("Y")) {
         git fetch --all --prune --quiet
         if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
             LocalMerge "develop" "${mainRepoName}/develop"
