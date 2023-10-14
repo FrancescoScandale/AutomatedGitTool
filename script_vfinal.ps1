@@ -22,7 +22,7 @@ function LocalMerge {
     git switch $mergeInto
     git pull --quiet
     
-    $err = git merge $mergeFrom --no-edit
+    $err = git merge $mergeFrom
     write-output "Summary of the merge, merging and pushing... "
     write-output "$err"
     if (($err -like "*fatal*") -or ($err -like "*failed*")) {
@@ -31,12 +31,12 @@ function LocalMerge {
         write-output "Just solve the conflict and save the file, this script will take care of the rest."
         read-host "Hit enter when ready"
         git add .
-        git commit
+        git commit --no-edit
     }
 
     git push --quiet
             
-    write-output "... done"
+    write-output "Merging and pushing completed!"
 }
 
 function TemporaryMainBranchCreation {
