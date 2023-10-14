@@ -13,6 +13,19 @@
 #set-psdebug -trace 0 #used to show in the command line the executed commands
 #git config --global pager.branch false #paging could affect the behavior of the script
 
+#check the system to know how to split the paths
+if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT) {
+    $splitString = '\\'
+}
+elseif ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Unix) {
+    $splitString = '/'
+}
+else {
+    Write-Host "Unable to determine the operating system type."
+    exit
+}
+
+
 function LocalMerge {
     param(
         [string]$mergeInto, [string]$mergeFrom
@@ -147,7 +160,7 @@ $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y 
 #ask which repos need to be aligned
 $needAlign = @()
 for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
-    $currentRepo = ($remoteRepos[$i] -split '\\')[-1]
+    $currentRepo = ($remoteRepos[$i] -split $splitString)[-1]
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
 }
