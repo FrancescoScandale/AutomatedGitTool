@@ -2,11 +2,11 @@
 #make sure it's executed in powershell
 
 git switch main
-git merge newtempmain
+git merge tempMain
 git push
 
-git branch -D newtempmain
-git push origin -d newtempmain
+git branch -D tempMain
+git push origin -d tempMain
 
 git switch test
 
@@ -17,8 +17,8 @@ git switch main
 git merge AutomatedGitTool/main --quiet
 git push --quiet
 
-git branch -D newtempmain
-git push origin -d newtempmain
+git branch -D tempMain
+git push origin -d tempMain
 
 
 Set-Location ..\AutomatedGitTool-2
@@ -27,7 +27,7 @@ git switch main
 git merge AutomatedGitTool/main --quiet
 git push --quiet
 
-git branch -D newtempmain
-git push origin -d newtempmain
+git branch -D tempMain
+git push origin -d tempMain
 
 set-location ..\AutomatedGitTool

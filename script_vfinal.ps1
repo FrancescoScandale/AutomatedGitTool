@@ -35,7 +35,7 @@ function LocalMerge {
     git switch $mergeInto
     git pull --quiet
     
-    $mergeMessage = git merge $mergeFrom 2>&1
+    $mergeMessage = git merge $mergeFrom 2>&1 #redirect stderr into stdout to check whether an error occurred
     write-host "Summary of the merge, merging and pushing... "
     write-host "$mergeMessage"
     if (($mergeMessage -like "*fatal*") -or ($mergeMessage -like "*failed*")) {
