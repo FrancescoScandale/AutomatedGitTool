@@ -1,5 +1,5 @@
 #!pwsh
-#make sure it's executed in powershell
+#executed in powershell
 
 
 #FINAL VERSION OF THE SCRIPT. BEHAVIOUR:
