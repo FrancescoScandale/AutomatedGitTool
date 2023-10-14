@@ -31,17 +31,17 @@ function LocalMerge {
         [string]$mergeInto, [string]$mergeFrom
     )
 
-    write-output "$mergeInto <- $mergeFrom"
+    write-host "$mergeInto <- $mergeFrom"
     git switch $mergeInto
     git pull --quiet
     
     $mergeMessage = git merge $mergeFrom 2>&1
-    write-output "Summary of the merge, merging and pushing... "
-    write-output "$mergeMessage"
+    write-host "Summary of the merge, merging and pushing... "
+    write-host "$mergeMessage"
     if (($mergeMessage -like "*fatal*") -or ($mergeMessage -like "*failed*")) {
-        write-output "AN ERROR OCCURRED!"
-        write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, which has an easy graphical interface."
-        write-output "Just solve the conflict and save the file, this script will take care of the rest."
+        write-host "AN ERROR OCCURRED!"
+        write-host "Solve the conflict: suggestion is to use Visual Studio Code's git extension, which has an easy graphical interface."
+        write-host "Just solve the conflict and save the file, this script will take care of the rest."
         read-host "Hit enter when ready"
         git add .
         git commit --no-edit
@@ -49,7 +49,7 @@ function LocalMerge {
 
     git push --quiet
             
-    write-output "Merging and pushing completed!"
+    write-host "Merging and pushing completed!"
 }
 
 function TemporaryMainBranchCreation {
@@ -58,13 +58,13 @@ function TemporaryMainBranchCreation {
     git fetch --all --prune --quiet
     $allBranch = git branch -a
     $temporaryBranch = read-host "Insert the name for a temporary branch"
-    $temporaryBranch.Trim()
+    #$temporaryBranch.Trim()
     $branchNotExists = $false
     while (!$branchNotExists) {
         #check if branch already exists
         foreach ($branchI in $allBranch) {
             if ($branchI.equals("  $temporaryBranch") -or $branchI.equals("* $temporaryBranch") -or $branchI.equals("  remotes/origin/$temporaryBranch")) {
-                write-output "A branch with the name $temporaryBranch already exists"
+                write-host "A branch with the name $temporaryBranch already exists"
 
                 $consentBranch = read-host "Do you want to use it anyway? [y/Y if yes, any other if no]"
                 if ($consentBranch.equals("y") -or $consentBranch.equals("Y")) {
@@ -77,7 +77,7 @@ function TemporaryMainBranchCreation {
                     #branch already exists but it's not to be used
                     $branchNotExists = $true
                     $temporaryBranch = read-host "Insert another name for a temporary branch"
-                    $temporaryBranch.Trim()
+                    #$temporaryBranch.Trim()
                 }
                 break
             }
@@ -128,33 +128,33 @@ foreach ($line in get-content .\config) {
     $remoteRepos = $remoteRepos + $line
 }
 set-location $remoteRepos[0]
-write-output "Current repository: "
+write-host "Current repository: "
 split-path -path $pwd -leaf
-write-output ""
-write-output "Remote repositories location: "
-write-output $remoteRepos
-write-output ""
-write-output ""
+write-host ""
+write-host "Remote repositories location: "
+write-host $remoteRepos
+write-host ""
+write-host ""
 
 $mainRepoName = split-path -path $pwd -leaf
 
 #commit current changes
-write-output "COMMIT CURRENT CHANGES"
+write-host "COMMIT CURRENT CHANGES"
 $modificationsBranch = git branch --show-current #retrieve current branch
-write-output "Current branch: $modificationsBranch"
+write-host "Current branch: $modificationsBranch"
 $commitMessage = read-host "Insert the commit message"
-write-output "Git does add, commit and push..."
+write-host "Git does add, commit and push..."
 git add .
 git commit -m $commitMessage --quiet
 git push -u origin $modificationsBranch --quiet
-write-output "... done"
-write-output ""
-write-output ""
+write-host "... done"
+write-host ""
+write-host ""
 
 #ask which branches need to be aligned
 $consentMain = read-host "Do you want to merge into branch ""main""? [y/Y if yes, any other if no]"
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-    write-output "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
+    write-host "Can't merge directly into main (needs a pull request from GitHub), need to create a temporary branch and merge into it."
     $temporaryMainBranch = TemporaryMainBranchCreation
 }
 $consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y if yes, any other if no]"
@@ -166,29 +166,29 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
 }
-write-output ""
-write-output ""
-write-output ""
+write-host ""
+write-host ""
+write-host ""
 
 #ORIGIN REPOSITORY
-write-output "ALIGN CURRENT REPOSITORY"
+write-host "ALIGN CURRENT REPOSITORY"
 split-path -path $pwd -leaf
 git fetch --all --prune --quiet
 
 if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
     LocalMerge "develop" $modificationsBranch
 }
-write-output ""
+write-host ""
 
 if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
     LocalMerge $temporaryMainBranch $modificationsBranch
 }
-write-output ""
-write-output ""
-write-output ""
+write-host ""
+write-host ""
+write-host ""
 
 #REMOTE REPOSITORIES
-write-output "ALIGN REMOTE REPOSITORIES"
+write-host "ALIGN REMOTE REPOSITORIES"
 for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
     set-location $remoteRepos[$i]
     split-path -path $pwd -leaf
@@ -198,21 +198,21 @@ for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
         if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
             LocalMerge "develop" "${mainRepoName}/develop"
         }
-        write-output ""
+        write-host ""
         
         if ($consentRelease.equals("y") -or $consentRelease.equals("Y")) {
             LocalMerge "release" "develop"
         }
-        write-output ""
+        write-host ""
         
         if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
             TmpBranchCreation
             LocalMerge $temporaryMainBranch "${mainRepoName}/${temporaryMainBranch}"
         }
     }
-    write-output ""
-    write-output ""
-    write-output ""
+    write-host ""
+    write-host ""
+    write-host ""
 }
 
 set-location $remoteRepos[0]
@@ -221,7 +221,7 @@ git switch main
 $consent = read-host "Delete branch ${modificationsBranch}? [y/Y if yes, any other if no]"
 if ($consent.equals("y") -or $consent.equals("Y")) {
     if ($modificationsBranch.equals("main") -or $modificationsBranch.equals("develop") -or ($modificationsBranch -like "*release*")) {
-        write-output "Can't delete this branch!"
+        write-host "Can't delete this branch!"
     }
     else {
         git branch -D $modificationsBranch
