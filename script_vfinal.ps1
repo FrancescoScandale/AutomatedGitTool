@@ -58,12 +58,13 @@ function TemporaryMainBranchCreation {
     git fetch --all --prune --quiet
     $allBranch = git branch -a
     $temporaryBranch = read-host "Insert the name for a temporary branch"
+    $temporaryBranch.Trim()
     $branchNotExists = $false
     while (!$branchNotExists) {
         #check if branch already exists
         foreach ($branchI in $allBranch) {
             if ($branchI.equals("  $temporaryBranch") -or $branchI.equals("* $temporaryBranch") -or $branchI.equals("  remotes/origin/$temporaryBranch")) {
-                write-output "A branch with the name $temporaryBranch alrady exists"
+                write-output "A branch with the name $temporaryBranch already exists"
 
                 $consentBranch = read-host "Do you want to use it anyway? [y/Y if yes, any other if no]"
                 if ($consentBranch.equals("y") -or $consentBranch.equals("Y")) {
@@ -76,6 +77,7 @@ function TemporaryMainBranchCreation {
                     #branch already exists but it's not to be used
                     $branchNotExists = $true
                     $temporaryBranch = read-host "Insert another name for a temporary branch"
+                    $temporaryBranch.Trim()
                 }
                 break
             }
