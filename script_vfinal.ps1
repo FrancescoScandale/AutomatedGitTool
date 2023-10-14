@@ -35,10 +35,10 @@ function LocalMerge {
     git switch $mergeInto
     git pull --quiet
     
-    $err = git merge $mergeFrom
+    $mergeMessage = git merge $mergeFrom
     write-output "Summary of the merge, merging and pushing... "
-    write-output "$err"
-    if (($err -like "*fatal*") -or ($err -like "*failed*")) {
+    write-output "$mergeMessage"
+    if (($mergeMessage -like "*fatal*") -or ($mergeMessage -like "*failed*")) {
         write-output "AN ERROR OCCURRED!"
         write-output "Solve the conflict: suggestion is to use Visual Studio Code's git extension, which has an easy graphical interface."
         write-output "Just solve the conflict and save the file, this script will take care of the rest."
