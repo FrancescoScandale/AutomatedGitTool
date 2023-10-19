@@ -58,7 +58,6 @@ function TemporaryMainBranchCreation {
     git fetch --all --prune --quiet
     $allBranch = git branch -a
     $temporaryBranch = read-host "Insert the name for a temporary branch"
-    #$temporaryBranch.Trim()
     $branchNotExists = $false
     while (!$branchNotExists) {
         #check if branch already exists
@@ -77,7 +76,6 @@ function TemporaryMainBranchCreation {
                     #branch already exists but it's not to be used
                     $branchNotExists = $true
                     $temporaryBranch = read-host "Insert another name for a temporary branch"
-                    #$temporaryBranch.Trim()
                 }
                 break
             }
@@ -132,7 +130,9 @@ write-host "Current repository: "
 split-path -path $pwd -leaf
 write-host ""
 write-host "Remote repositories location: "
-write-host $remoteRepos
+foreach($rm in $remoteRepos){
+    write-host $rm
+}
 write-host ""
 write-host ""
 
