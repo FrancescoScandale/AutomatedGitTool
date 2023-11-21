@@ -130,7 +130,7 @@ write-host "Current repository: "
 split-path -path $pwd -leaf
 write-host ""
 write-host "Remote repositories location: "
-foreach($rm in $remoteRepos){
+foreach ($rm in $remoteRepos) {
     write-host $rm
 }
 write-host ""
@@ -161,7 +161,7 @@ $consentDevelop = read-host "Do you want to merge into branch ""develop""? [y/Y 
 $consentRelease = read-host "Do you want to merge into branch ""release""? [y/Y if yes, any other if no]"
 #ask which repos need to be aligned
 $needAlign = @()
-for ($i = 1; $i -lt $remoteRepos.Length; $i++) {
+for ($i = 0; $i -lt $remoteRepos.Length; $i++) {
     $currentRepo = ($remoteRepos[$i] -split $splitString)[-1]
     $consent = read-host "Do you want to align repo ${currentRepo}? [y/Y to proceed, any other key to skip]"
     $needAlign = $needAlign + $consent
@@ -171,21 +171,23 @@ write-host ""
 write-host ""
 
 #ORIGIN REPOSITORY
-write-host "ALIGN CURRENT REPOSITORY"
-split-path -path $pwd -leaf
-git fetch --all --prune --quiet
+if ($needAlign[0].equals("y") -or $needAlign[0].equals("Y")) {
+    write-host "ALIGN CURRENT REPOSITORY"
+    split-path -path $pwd -leaf
+    git fetch --all --prune --quiet
 
-if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
-    LocalMerge "develop" $modificationsBranch
-}
-write-host ""
+    if ($consentDevelop.equals("y") -or $consentDevelop.equals("Y")) {
+        LocalMerge "develop" $modificationsBranch
+    }
+    write-host ""
 
-if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
-    LocalMerge $temporaryMainBranch $modificationsBranch
+    if ($consentMain.equals("y") -or $consentMain.equals("Y")) {
+        LocalMerge $temporaryMainBranch $modificationsBranch
+    }
+    write-host ""
+    write-host ""
+    write-host ""
 }
-write-host ""
-write-host ""
-write-host ""
 
 #REMOTE REPOSITORIES
 write-host "ALIGN REMOTE REPOSITORIES"
